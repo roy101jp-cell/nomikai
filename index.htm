@@ -3,121 +3,388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>飲み会</title>
+  <title>Claude Work Lab 夜の部 | 2026.06.10</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --cyan:    #00e5ff;
+      --magenta: #ff2d7a;
+      --blue:    #2979ff;
+      --dark:    #050510;
+      --text:    #cce8f0;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Segoe UI', 'Meiryo', sans-serif;
-      background: #1a1a2e;
-      color: #eee;
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Meiryo', 'Yu Gothic', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* グリッド背景 */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* スキャンライン */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; }
+
+    /* ─── HERO ─── */
+    .hero {
       min-height: 100vh;
-    }
-    header {
-      background: linear-gradient(135deg, #e94560, #c23152);
-      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
+      padding: 3rem 1.5rem;
+      position: relative;
     }
-    header h1 {
-      font-size: 2.4rem;
-      letter-spacing: 0.05em;
+
+    .corner {
+      position: absolute;
+      width: 64px; height: 64px;
     }
-    header p {
-      margin-top: 0.5rem;
-      opacity: 0.9;
-      font-size: 1.1rem;
-    }
-    main {
-      max-width: 760px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .card {
-      background: #16213e;
-      border-radius: 10px;
-      padding: 1.6rem;
+    .corner.tl { top: 1.5rem; left: 1.5rem;
+      border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan);
+      box-shadow: -4px -4px 12px var(--cyan); }
+    .corner.tr { top: 1.5rem; right: 1.5rem;
+      border-top: 2px solid var(--cyan); border-right: 2px solid var(--cyan);
+      box-shadow: 4px -4px 12px var(--cyan); }
+    .corner.bl { bottom: 1.5rem; left: 1.5rem;
+      border-bottom: 2px solid var(--cyan); border-left: 2px solid var(--cyan);
+      box-shadow: -4px 4px 12px var(--cyan); }
+    .corner.br { bottom: 1.5rem; right: 1.5rem;
+      border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan);
+      box-shadow: 4px 4px 12px var(--cyan); }
+
+    .hero-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.5em;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
       margin-bottom: 1.5rem;
-      border-left: 4px solid #e94560;
+      animation: blink 2.5s step-end infinite;
     }
-    .card h2 {
-      color: #e94560;
-      font-size: 1.2rem;
-      margin-bottom: 0.8rem;
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 6vw, 4rem);
+      color: #fff;
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+      animation: pulse 3s ease-in-out infinite;
     }
-    .card p, .card li {
-      line-height: 1.8;
-      color: #ccc;
+
+    .hero h1 .night {
+      display: block;
+      font-size: clamp(3rem, 10vw, 7rem);
+      color: var(--cyan);
     }
-    .card ul {
-      padding-left: 1.2rem;
+
+    .hero-date {
+      margin-top: 2rem;
+      padding: 0.9rem 2.5rem;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 18px var(--cyan), inset 0 0 18px rgba(0,229,255,0.06);
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-shadow: 0 0 12px var(--cyan);
     }
-    .info-grid {
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        text-shadow: 0 0 10px var(--cyan), 0 0 24px var(--cyan), 0 0 48px var(--blue);
+      }
+      50% {
+        text-shadow: 0 0 20px var(--cyan), 0 0 50px var(--cyan), 0 0 100px var(--blue), 0 0 160px var(--cyan);
+      }
+    }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--cyan), transparent);
+      margin: 0 1.5rem;
+      opacity: 0.35;
+    }
+
+    /* ─── SECTIONS ─── */
+    section { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.2rem; }
+
+    .sec-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.45em;
+      color: var(--magenta);
+      text-shadow: 0 0 8px var(--magenta);
+      margin-bottom: 1.2rem;
+    }
+    .sec-label::before { content: '// '; }
+
+    /* INFO CARD */
+    .info-card {
+      border: 1px solid var(--cyan);
+      padding: 2rem;
+      box-shadow: 0 0 24px rgba(0,229,255,0.18), inset 0 0 24px rgba(0,229,255,0.03);
+      position: relative;
+    }
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 24px;
+      width: 40px; height: 2px;
+      background: var(--dark);
+    }
+
+    .info-row {
       display: grid;
-      grid-template-columns: 6rem 1fr;
-      gap: 0.6rem 1rem;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 0.8rem 1.5rem;
+      margin-bottom: 1.4rem;
+      align-items: start;
     }
-    .info-grid .label {
-      color: #e94560;
-      font-weight: bold;
+    .info-row:last-child { margin-bottom: 0; }
+
+    .info-lbl {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      color: var(--magenta);
+      text-shadow: 0 0 8px var(--magenta);
+      padding-top: 0.3rem;
     }
-    .btn {
-      display: inline-block;
-      margin-top: 1rem;
-      background: #e94560;
-      color: white;
-      padding: 0.7rem 1.6rem;
-      border-radius: 6px;
+
+    .info-val { color: #fff; line-height: 1.8; font-size: 1rem; }
+    .info-val strong {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--cyan);
+      text-shadow: 0 0 8px var(--cyan);
+      margin-bottom: 0.1rem;
+    }
+
+    /* IMAGES */
+    .img-full {
+      width: 100%; display: block;
+      border: 1px solid rgba(0,229,255,0.3);
+      box-shadow: 0 0 24px rgba(0,229,255,0.12);
+      filter: saturate(1.15) contrast(1.05);
+    }
+
+    .img-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .img-cap {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      opacity: 0.65;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    /* MAP LINK */
+    .map-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--cyan);
       text-decoration: none;
-      font-size: 1rem;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      border: 1px solid var(--cyan);
+      padding: 0.55rem 1.2rem;
+      box-shadow: 0 0 12px rgba(0,229,255,0.3);
+      transition: box-shadow 0.3s;
+      margin-bottom: 1.2rem;
     }
-    .btn:hover { background: #c23152; }
+    .map-btn:hover {
+      box-shadow: 0 0 24px var(--cyan), inset 0 0 12px rgba(0,229,255,0.1);
+    }
+
+    /* QR */
+    .qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .qr-wrap img {
+      width: 200px; height: 200px;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 24px var(--cyan);
+      padding: 10px;
+      background: #fff;
+    }
+
+    /* FOOTER */
     footer {
       text-align: center;
-      padding: 2rem;
-      color: #555;
-      font-size: 0.85rem;
+      padding: 3rem 1rem 4rem;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.3em;
+    }
+    .footer-host {
+      font-size: 1.1rem;
+      color: var(--cyan);
+      text-shadow: 0 0 12px var(--cyan);
+      margin-bottom: 0.6rem;
+    }
+    .footer-sub {
+      font-size: 0.65rem;
+      color: rgba(0,229,255,0.4);
+    }
+
+    @media (max-width: 580px) {
+      .img-grid { grid-template-columns: 1fr; }
+      .info-row  { grid-template-columns: 4.5rem 1fr; }
+      .hero-date { padding: 0.8rem 1.2rem; letter-spacing: 0.06em; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>飲み会のご案内</h1>
-    <p>みんなで楽しく乾杯しましょう！</p>
-  </header>
+<div class="wrap">
 
-  <main>
-    <div class="card">
-      <h2>開催情報</h2>
-      <div class="info-grid">
-        <span class="label">日時</span>
-        <span>2026年〇月〇日（〇曜日）19:00〜</span>
-        <span class="label">場所</span>
-        <span>〇〇居酒屋（〇〇駅 徒歩3分）</span>
-        <span class="label">会費</span>
-        <span>4,000円（飲み放題付き）</span>
-        <span class="label">定員</span>
-        <span>20名</span>
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="hero-badge">▶ EVENT INFORMATION 2026.06.10</div>
+    <h1>
+      CLAUDE WORK LAB
+      <span class="night">夜の部</span>
+    </h1>
+    <div class="hero-date">2026 / 06 / 10 &nbsp;|&nbsp; 17:45 START</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══ EVENT DETAILS ═══ -->
+  <section>
+    <div class="sec-label">EVENT DETAILS</div>
+    <div class="info-card">
+      <div class="info-row">
+        <div class="info-lbl">DATE</div>
+        <div class="info-val">
+          <strong>2026年6月10日（水）</strong>
+          17:45 〜
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-lbl">VENUE</div>
+        <div class="info-val">
+          <strong>土佐郷土料理 わら焼き 龍馬商店 新橋駅前店</strong>
+          東京都港区新橋２丁目１６−１<br>ニュー新橋ビル 3F
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-lbl">HOST</div>
+        <div class="info-val">
+          <strong>Teramoto</strong>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="card">
-      <h2>参加方法</h2>
-      <ul>
-        <li>下記の参加ボタンから申し込みをお願いします。</li>
-        <li>〇月〇日（〇曜日）までにお申し込みください。</li>
-        <li>キャンセルは3日前までにご連絡ください。</li>
-      </ul>
-      <a class="btn" href="#">参加する</a>
+  <div class="divider"></div>
+
+  <!-- ═══ RESTAURANT ═══ -->
+  <section>
+    <div class="sec-label">RESTAURANT</div>
+    <img class="img-full" src="image/shop.png" alt="龍馬商店 新橋店">
+    <div class="img-cap">▲ 土佐郷土料理 わら焼き 龍馬商店 — ニュー新橋ビル 3F</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ FEATURED DISH ═══ -->
+  <section>
+    <div class="sec-label">FEATURED DISH</div>
+    <img class="img-full" src="image/katsuo.jpg" alt="わら焼きカツオのタタキ">
+    <div class="img-cap">▲ 土佐名物 わら焼きカツオのタタキ</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ ACCESS ═══ -->
+  <section>
+    <div class="sec-label">ACCESS</div>
+    <div>
+      <a class="map-btn"
+         href="https://maps.google.com/?q=東京都港区新橋2-16-1+ニュー新橋ビル"
+         target="_blank" rel="noopener">
+        ▶ GOOGLE MAPS で開く
+      </a>
     </div>
-
-    <div class="card">
-      <h2>お問い合わせ</h2>
-      <p>不明点は幹事までご連絡ください。</p>
-      <p>メール：example@example.com</p>
+    <div class="img-grid">
+      <div>
+        <img class="img-full" src="image/map.png" alt="周辺アクセスマップ">
+        <div class="img-cap">▲ 周辺アクセスマップ</div>
+      </div>
+      <div>
+        <img class="img-full" src="image/floormap.png" alt="ニュー新橋ビル 3Fフロアマップ">
+        <div class="img-cap">▲ ニュー新橋ビル 3F フロアマップ</div>
+      </div>
     </div>
-  </main>
+  </section>
 
+  <div class="divider"></div>
+
+  <!-- ═══ QR CODE ═══ -->
+  <section>
+    <div class="sec-label">SHARE THIS PAGE</div>
+    <div class="qr-wrap">
+      <img src="image/qr.png" alt="このページのQRコード">
+      <div class="img-cap">▲ このページのQRコード — 配布・印刷用</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ FOOTER ═══ -->
   <footer>
-    &copy; 2026 nomikai
+    <div class="footer-host">ORGANIZER : TERAMOTO</div>
+    <div class="footer-sub">CLAUDE WORK LAB 夜の部 &nbsp;|&nbsp; 2026.06.10</div>
   </footer>
+
+</div>
 </body>
 </html>

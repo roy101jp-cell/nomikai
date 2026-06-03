@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飲み会</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Meiryo', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #e94560, #c23152);
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      letter-spacing: 0.05em;
+    }
+    header p {
+      margin-top: 0.5rem;
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+    main {
+      max-width: 760px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 10px;
+      padding: 1.6rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #e94560;
+    }
+    .card h2 {
+      color: #e94560;
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+    .card p, .card li {
+      line-height: 1.8;
+      color: #ccc;
+    }
+    .card ul {
+      padding-left: 1.2rem;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 6rem 1fr;
+      gap: 0.6rem 1rem;
+    }
+    .info-grid .label {
+      color: #e94560;
+      font-weight: bold;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      background: #e94560;
+      color: white;
+      padding: 0.7rem 1.6rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .btn:hover { background: #c23152; }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #555;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>飲み会のご案内</h1>
+    <p>みんなで楽しく乾杯しましょう！</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>開催情報</h2>
+      <div class="info-grid">
+        <span class="label">日時</span>
+        <span>2026年〇月〇日（〇曜日）19:00〜</span>
+        <span class="label">場所</span>
+        <span>〇〇居酒屋（〇〇駅 徒歩3分）</span>
+        <span class="label">会費</span>
+        <span>4,000円（飲み放題付き）</span>
+        <span class="label">定員</span>
+        <span>20名</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>参加方法</h2>
+      <ul>
+        <li>下記の参加ボタンから申し込みをお願いします。</li>
+        <li>〇月〇日（〇曜日）までにお申し込みください。</li>
+        <li>キャンセルは3日前までにご連絡ください。</li>
+      </ul>
+      <a class="btn" href="#">参加する</a>
+    </div>
+
+    <div class="card">
+      <h2>お問い合わせ</h2>
+      <p>不明点は幹事までご連絡ください。</p>
+      <p>メール：example@example.com</p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 nomikai
+  </footer>
+</body>
+</html>

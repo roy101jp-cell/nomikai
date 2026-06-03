@@ -7,16 +7,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --c:  #00e5ff;          /* cyan  */
-      --g:  #00ffcc;          /* green */
-      --m:  #ff2d7a;          /* magenta */
-      --b:  #2979ff;          /* blue  */
+      --c:  #00e5ff;
+      --g:  #00ffcc;
+      --m:  #ff2d7a;
+      --b:  #2979ff;
       --bg: #050510;
       --tx: #cce8f0;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--bg);
       color: var(--tx);
@@ -24,7 +22,7 @@
       overflow-x: hidden;
     }
 
-    /* Grid overlay */
+    /* Grid */
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
@@ -32,17 +30,38 @@
         linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
       background-size: 48px 48px;
     }
-
     /* Scanlines */
     body::after {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
-        rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px
-      );
+        rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px);
     }
 
-    /* CRT sweep line */
+    /* ─── OVERLOAD MODE (CSS variable override) ─── */
+    body.overload {
+      --c: #ff2200; --g: #ff4400; --m: #ff0000; --b: #ff0000; --tx: #ff8888;
+      animation: flicker-bg .07s step-end infinite;
+    }
+    body.overload::before {
+      background-image:
+        linear-gradient(rgba(255,0,0,.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,0,.1) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    body.overload::after {
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 1px,
+        rgba(255,0,0,.22) 1px, rgba(255,0,0,.22) 3px);
+    }
+    @keyframes flicker-bg {
+      0%,100% { background-color: #050510; }
+      50%      { background-color: #150000; }
+    }
+    #overload-banner { display: none; }
+    body.overload #overload-banner { display: block; }
+
+    /* CRT sweep */
     #crt {
       position: fixed; left: 0; right: 0; height: 2px; z-index: 1; pointer-events: none;
       background: linear-gradient(90deg, transparent, rgba(0,229,255,.07), transparent);
@@ -50,19 +69,17 @@
     }
     @keyframes sweep { from { top: -2px; } to { top: 100vh; } }
 
-    /* ═══════════════════════════════════════
+    /* ══════════════════════════════════════
        BOOT OVERLAY
-    ═══════════════════════════════════════ */
+    ══════════════════════════════════════ */
     #boot {
       position: fixed; inset: 0; z-index: 9999;
       background: #000;
       display: flex; flex-direction: column;
       justify-content: flex-start;
       padding: clamp(1.5rem, 5vw, 4rem);
-      transition: opacity .8s ease;
-      overflow: hidden;
+      transition: opacity .8s ease; overflow: hidden;
     }
-
     #boot-hdr {
       font-family: 'Courier New', monospace;
       font-size: clamp(.62rem, 1.8vw, .82rem);
@@ -70,11 +87,7 @@
       border-bottom: 1px solid rgba(0,255,204,.2);
       padding-bottom: 1rem; margin-bottom: 1.5rem; width: 100%;
     }
-    #boot-hdr .t {
-      font-size: clamp(.78rem, 2.2vw, 1.05rem);
-      letter-spacing: .3em; margin-bottom: .35rem;
-    }
-
+    #boot-hdr .t { font-size: clamp(.78rem, 2.2vw, 1.05rem); letter-spacing: .3em; margin-bottom: .35rem; }
     #boot-log {
       font-family: 'Courier New', monospace;
       font-size: clamp(.62rem, 1.8vw, .86rem);
@@ -82,38 +95,25 @@
     }
     .bl     { color: #999; word-break: break-all; }
     .bl .ok { color: var(--g); }
-
-    #boot-cur {
-      font-family: 'Courier New', monospace;
-      font-size: clamp(.62rem, 1.8vw, .86rem);
-      color: var(--g); animation: blink .7s step-end infinite;
-    }
+    #boot-cur { font-family: 'Courier New', monospace; font-size: clamp(.62rem,1.8vw,.86rem); color: var(--g); animation: blink .7s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
-
     #boot-enter { margin-top: 2rem; display: none; text-align: center; }
     #boot-enter button {
       font-family: 'Orbitron', monospace;
-      font-size: clamp(.78rem, 2.2vw, 1rem);
-      letter-spacing: .3em; color: var(--g);
+      font-size: clamp(.78rem, 2.2vw, 1rem); letter-spacing: .3em; color: var(--g);
       background: transparent; border: 1px solid var(--g);
-      padding: .9rem clamp(1.5rem, 5vw, 3rem);
-      cursor: pointer;
+      padding: .9rem clamp(1.5rem, 5vw, 3rem); cursor: pointer;
       text-shadow: 0 0 10px var(--g);
-      box-shadow: 0 0 20px rgba(0,255,204,.25), inset 0 0 20px rgba(0,255,204,.05);
-      animation: pulse-e 1.4s ease-in-out infinite;
-      transition: box-shadow .3s;
-    }
-    #boot-enter button:hover {
-      box-shadow: 0 0 40px rgba(0,255,204,.5), inset 0 0 20px rgba(0,255,204,.12);
+      animation: pulse-e 1.4s ease-in-out infinite; transition: box-shadow .3s;
     }
     @keyframes pulse-e {
       0%,100% { box-shadow: 0 0 20px rgba(0,255,204,.25), inset 0 0 20px rgba(0,255,204,.05); }
       50%      { box-shadow: 0 0 40px rgba(0,255,204,.45), inset 0 0 20px rgba(0,255,204,.1); }
     }
 
-    /* ═══════════════════════════════════════
-       HUD CLOCK  (fixed top-right)
-    ═══════════════════════════════════════ */
+    /* ══════════════════════════════════════
+       HUD CLOCK
+    ══════════════════════════════════════ */
     #hud {
       position: fixed; top: 1rem; right: 1rem; z-index: 1000;
       font-family: 'Courier New', monospace;
@@ -128,9 +128,18 @@
     }
     #hud-cd.mission { color: var(--m); text-shadow: 0 0 8px var(--m); }
 
-    /* ═══════════════════════════════════════
-       MUSIC BUTTON  (fixed bottom-right)
-    ═══════════════════════════════════════ */
+    /* OVERLOAD BANNER */
+    #overload-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+      background: rgba(255,0,0,.18); border-bottom: 2px solid #f00;
+      text-align: center; padding: .5rem 1rem;
+      font-family: 'Orbitron', monospace; font-size: .7rem;
+      color: #f00; letter-spacing: .35em;
+      text-shadow: 0 0 10px #f00;
+      animation: blink .35s step-end infinite;
+    }
+
+    /* MUSIC BTN */
     #mbtn {
       position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000;
       font-family: 'Orbitron', monospace; font-size: .62rem; letter-spacing: .18em;
@@ -142,58 +151,163 @@
     #mbtn:hover { box-shadow: 0 0 22px rgba(0,229,255,.4); }
     #mbtn.on { border-color: var(--g); color: var(--g); box-shadow: 0 0 10px rgba(0,255,204,.25); }
 
-    /* ═══════════════════════════════════════
-       MAIN CONTENT
-    ═══════════════════════════════════════ */
-    #app {
-      position: relative; z-index: 1;
-      opacity: 0; transition: opacity .9s ease;
+    /* ══════════════════════════════════════
+       CUSTOM CURSOR (desktop only)
+    ══════════════════════════════════════ */
+    @media (pointer: fine) { * { cursor: none !important; } }
+    #reticle {
+      position: fixed; z-index: 9990; pointer-events: none;
+      width: 38px; height: 38px;
+      transform: translate(-50%, -50%);
+      display: none;
+      transition: width .12s ease, height .12s ease;
+    }
+    @media (pointer: coarse) { #reticle { display: none !important; } }
+    .rh, .rv {
+      position: absolute; background: var(--c); box-shadow: 0 0 5px var(--c);
+    }
+    .rh { left:0; right:0; top:50%; height:1px; transform:translateY(-50%); }
+    .rv { top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%); }
+    .rc { position: absolute; width: 7px; height: 7px; }
+    .rc.tl { top:0; left:0;  border-top:1px solid var(--c); border-left:1px solid var(--c); }
+    .rc.tr { top:0; right:0; border-top:1px solid var(--c); border-right:1px solid var(--c); }
+    .rc.bl { bottom:0; left:0;  border-bottom:1px solid var(--c); border-left:1px solid var(--c); }
+    .rc.br { bottom:0; right:0; border-bottom:1px solid var(--c); border-right:1px solid var(--c); }
+    .rdot {
+      position: absolute; width: 3px; height: 3px; border-radius: 50%;
+      background: var(--c); box-shadow: 0 0 5px var(--c);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+    }
+    #rlabel {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      font-family: 'Courier New', monospace; font-size: .5rem; letter-spacing: .12em;
+      color: var(--c); white-space: nowrap; opacity: 0; transition: opacity .15s;
+    }
+    #reticle.lock { width: 54px; height: 54px; }
+    #reticle.lock .rh,
+    #reticle.lock .rv,
+    #reticle.lock .rdot { background: var(--m); box-shadow: 0 0 8px var(--m); }
+    #reticle.lock .rc   { border-color: var(--m); }
+    #reticle.lock #rlabel { opacity: 1; color: var(--m); }
+
+    /* ══════════════════════════════════════
+       BIO-AUTH OVERLAY
+    ══════════════════════════════════════ */
+    #bio-ov {
+      position: fixed; inset: 0; z-index: 8000;
+      background: rgba(0,0,0,.93);
+      display: none; justify-content: center; align-items: center;
+      padding: 1rem;
+    }
+    #bio-ov.show { display: flex; }
+    .bio-box {
+      width: min(500px, 92vw);
+      border: 1px solid var(--g);
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      box-shadow: 0 0 50px rgba(0,255,204,.25);
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      position: relative;
+    }
+    .bio-title {
+      font-family: 'Orbitron', monospace; font-size: clamp(.7rem, 2vw, .88rem);
+      letter-spacing: .3em; color: var(--g); text-shadow: 0 0 10px var(--g);
+      margin-bottom: 1.8rem;
+    }
+    .bio-ring-wrap { margin: 0 auto 1.5rem; width: 80px; height: 80px; position: relative; }
+    .bio-ring {
+      width: 100%; height: 100%;
+      border: 2px solid var(--g); border-radius: 50%;
+      animation: spin 2s linear infinite;
+      position: relative;
+    }
+    .bio-ring::before {
+      content: ''; position: absolute; inset: 5px;
+      border: 1px solid rgba(0,255,204,.35); border-radius: 50%;
+      animation: spin 1.4s linear infinite reverse;
+    }
+    .bio-ring::after {
+      content: '⊕'; position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; color: var(--g); text-shadow: 0 0 10px var(--g);
+      animation: spin 2s linear infinite reverse;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .bio-prog {
+      height: 4px; background: rgba(0,255,204,.12); margin: 0 0 1rem; overflow: hidden;
+    }
+    #bio-bar {
+      height: 100%; width: 0;
+      background: var(--g); box-shadow: 0 0 10px var(--g);
+    }
+    #bio-status {
+      font-size: clamp(.68rem, 1.8vw, .82rem); letter-spacing: .15em;
+      color: var(--g); text-shadow: 0 0 8px var(--g);
+      min-height: 1.6rem; animation: blink 1s step-end infinite;
+    }
+    #bio-secret {
+      display: none; margin-top: 1.8rem;
+      border-top: 1px solid rgba(0,255,204,.2); padding-top: 1.5rem;
+    }
+    #bio-secret .ok-msg {
+      font-family: 'Orbitron', monospace; font-size: .8rem;
+      color: var(--g); text-shadow: 0 0 10px var(--g);
+      letter-spacing: .2em; margin-bottom: 1.2rem;
+    }
+    #bio-secret .secret-info {
+      font-size: .82rem; line-height: 2; color: #ccc;
+    }
+    .bio-close-hint {
+      font-size: .62rem; opacity: .45; margin-top: 1rem;
+      font-family: 'Courier New', monospace;
     }
 
-    /* ── Hero ── */
+    /* PARTICIPATE BTN */
+    #part-btn {
+      font-family: 'Orbitron', monospace; font-size: clamp(.78rem, 2vw, .9rem);
+      letter-spacing: .25em; color: #000;
+      background: var(--g); border: none;
+      padding: 1rem clamp(1.5rem, 5vw, 3rem);
+      cursor: pointer; margin-top: 2rem;
+      box-shadow: 0 0 30px rgba(0,255,204,.5);
+      transition: box-shadow .3s, transform .15s;
+      display: block; width: 100%; max-width: 400px; margin: 2rem auto 0;
+    }
+    #part-btn:hover { box-shadow: 0 0 50px rgba(0,255,204,.8); transform: scale(1.02); }
+
+    /* ══════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════ */
+    #app { position: relative; z-index: 1; opacity: 0; transition: opacity .9s ease; }
+
+    /* Hero */
     .hero {
       min-height: 100vh;
       display: flex; flex-direction: column;
       justify-content: center; align-items: center;
-      text-align: center;
-      padding: 4rem 1.5rem; position: relative;
+      text-align: center; padding: 4rem 1.5rem; position: relative;
     }
-
     .co { position: absolute; width: 56px; height: 56px; }
-    .co.tl { top:1.5rem; left:1.5rem;
-      border-top:2px solid var(--c); border-left:2px solid var(--c);
-      box-shadow: -3px -3px 10px var(--c); }
-    .co.tr { top:1.5rem; right:1.5rem;
-      border-top:2px solid var(--c); border-right:2px solid var(--c);
-      box-shadow: 3px -3px 10px var(--c); }
-    .co.bl { bottom:1.5rem; left:1.5rem;
-      border-bottom:2px solid var(--c); border-left:2px solid var(--c);
-      box-shadow: -3px 3px 10px var(--c); }
-    .co.br { bottom:1.5rem; right:1.5rem;
-      border-bottom:2px solid var(--c); border-right:2px solid var(--c);
-      box-shadow: 3px 3px 10px var(--c); }
-
+    .co.tl { top:1.5rem; left:1.5rem;  border-top:2px solid var(--c); border-left:2px solid var(--c);  box-shadow:-3px -3px 10px var(--c); }
+    .co.tr { top:1.5rem; right:1.5rem; border-top:2px solid var(--c); border-right:2px solid var(--c); box-shadow: 3px -3px 10px var(--c); }
+    .co.bl { bottom:1.5rem; left:1.5rem;  border-bottom:2px solid var(--c); border-left:2px solid var(--c);  box-shadow:-3px 3px 10px var(--c); }
+    .co.br { bottom:1.5rem; right:1.5rem; border-bottom:2px solid var(--c); border-right:2px solid var(--c); box-shadow: 3px 3px 10px var(--c); }
     .badge {
       font-family: 'Orbitron', monospace; font-size: .68rem; letter-spacing: .5em;
       color: var(--c); text-shadow: 0 0 10px var(--c);
       margin-bottom: 1.5rem; animation: blink 2.5s step-end infinite;
     }
-
     .hero h1 {
       font-family: 'Orbitron', monospace; font-weight: 900;
       font-size: clamp(1.6rem, 5.5vw, 3.8rem);
       color: #fff; letter-spacing: .06em; line-height: 1.2;
       animation: glow-title 3s ease-in-out infinite;
     }
-    .hero h1 .night {
-      display: block; font-size: clamp(2.8rem, 9vw, 6.5rem); color: var(--c);
-    }
+    .hero h1 .night { display: block; font-size: clamp(2.8rem, 9vw, 6.5rem); color: var(--c); }
     @keyframes glow-title {
       0%,100% { text-shadow: 0 0 10px var(--c),0 0 24px var(--c),0 0 48px var(--b); }
       50%      { text-shadow: 0 0 20px var(--c),0 0 50px var(--c),0 0 100px var(--b); }
     }
-
-    /* Glitch on title text */
     .gt { position: relative; display: inline-block; }
     .gt::before, .gt::after {
       content: attr(data-t); position: absolute;
@@ -201,10 +315,8 @@
     }
     .gt::before { color: var(--m); }
     .gt::after  { color: var(--g); }
-
-    .gt.go::before { opacity:1; animation: ga .36s steps(3, end) forwards; }
-    .gt.go::after  { opacity:1; animation: gb .36s steps(3, end) forwards; }
-
+    .gt.go::before { opacity:1; animation: ga .36s steps(3,end) forwards; }
+    .gt.go::after  { opacity:1; animation: gb .36s steps(3,end) forwards; }
     @keyframes ga {
       0%  { clip-path:inset(20% 0 65% 0); transform:translate(-6px,0); }
       33% { clip-path:inset(70% 0 10% 0); transform:translate(6px,0); }
@@ -217,7 +329,6 @@
       66% { clip-path:inset(80% 0  5% 0); transform:translate(3px,0); }
       100%{ clip-path:inset(100% 0 0 0);  transform:translate(0); }
     }
-
     .hero-dt {
       margin-top: 2rem; padding: .85rem clamp(1rem, 4vw, 2.5rem);
       border: 1px solid var(--c);
@@ -227,55 +338,32 @@
       letter-spacing: .1em; color: var(--c); text-shadow: 0 0 12px var(--c);
     }
 
-    /* ── Divider ── */
+    /* Divider */
     .div {
       height: 1px;
       background: linear-gradient(to right, transparent, var(--c), transparent);
       margin: 0 1.5rem; opacity: .3;
     }
-
-    /* ── Sections ── */
     section { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.2rem; }
     .sl {
       font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: .45em;
       color: var(--m); text-shadow: 0 0 8px var(--m); margin-bottom: 1.2rem;
     }
     .sl::before { content: '// '; }
-
-    /* ── Info card ── */
     .card {
       border: 1px solid var(--c); padding: 2rem;
       box-shadow: 0 0 24px rgba(0,229,255,.14), inset 0 0 24px rgba(0,229,255,.03);
       position: relative;
     }
-    .card::before {
-      content: ''; position: absolute; top: -1px; left: 24px;
-      width: 40px; height: 2px; background: var(--bg);
-    }
-
+    .card::before { content: ''; position: absolute; top: -1px; left: 24px; width: 40px; height: 2px; background: var(--bg); }
     .row { display: grid; grid-template-columns: 5.5rem 1fr; gap: .8rem 1.5rem; margin-bottom: 1.4rem; align-items: start; }
     .row:last-child { margin-bottom: 0; }
-    .lbl {
-      font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: .2em;
-      color: var(--m); text-shadow: 0 0 8px var(--m); padding-top: .3rem;
-    }
+    .lbl { font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: .2em; color: var(--m); text-shadow: 0 0 8px var(--m); padding-top: .3rem; }
     .val { color: #fff; line-height: 1.8; font-size: 1rem; }
     .val strong { display: block; font-size: 1.1rem; color: var(--c); text-shadow: 0 0 8px var(--c); margin-bottom: .1rem; }
-
-    /* ── Images ── */
-    .img-f {
-      width: 100%; display: block;
-      border: 1px solid rgba(0,229,255,.28);
-      box-shadow: 0 0 20px rgba(0,229,255,.1);
-      filter: saturate(1.15) contrast(1.05);
-    }
+    .img-f { width: 100%; display: block; border: 1px solid rgba(0,229,255,.28); box-shadow: 0 0 20px rgba(0,229,255,.1); filter: saturate(1.15) contrast(1.05); }
     .ig { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .cap {
-      font-family: 'Orbitron', monospace; font-size: .56rem; letter-spacing: .2em;
-      color: var(--c); opacity: .6; text-align: center; margin-top: .5rem;
-    }
-
-    /* ── Map button ── */
+    .cap { font-family: 'Orbitron', monospace; font-size: .56rem; letter-spacing: .2em; color: var(--c); opacity: .6; text-align: center; margin-top: .5rem; }
     .mbtn-a {
       display: inline-flex; align-items: center; gap: .5rem;
       color: var(--c); text-decoration: none;
@@ -285,22 +373,52 @@
       transition: box-shadow .3s; margin-bottom: 1.2rem;
     }
     .mbtn-a:hover { box-shadow: 0 0 24px var(--c), inset 0 0 10px rgba(0,229,255,.08); }
-
-    /* ── QR ── */
     .qr { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
     .qr img { width: 200px; height: 200px; border: 2px solid var(--c); box-shadow: 0 0 24px var(--c); padding: 10px; background: #fff; }
 
-    /* ── Footer ── */
+    /* ══════════════════════════════════════
+       PSEUDO TERMINAL
+    ══════════════════════════════════════ */
+    #term {
+      background: #000; border: 1px solid rgba(0,229,255,.25);
+      box-shadow: 0 0 20px rgba(0,229,255,.08);
+      padding: .85rem 1rem; height: 220px;
+      overflow-y: auto; scroll-behavior: smooth;
+      font-family: 'Courier New', monospace; font-size: clamp(.66rem, 1.6vw, .78rem);
+      line-height: 1.75; color: #00cc88;
+    }
+    #term::-webkit-scrollbar { width: 4px; }
+    #term::-webkit-scrollbar-track { background: #000; }
+    #term::-webkit-scrollbar-thumb { background: var(--c); }
+    .tl-line { word-break: break-all; }
+    .tl-ts   { color: #444; }
+    .tl-al   { color: var(--m); }
+    .tl-ok   { color: var(--g); }
+    .tl-info { color: #00aaff; }
+    .tl-cmd  { color: #fff; }
+    #term-row {
+      display: flex; align-items: center; gap: .5rem;
+      background: #000;
+      border: 1px solid rgba(0,229,255,.25); border-top: none;
+      padding: .45rem 1rem;
+      font-family: 'Courier New', monospace; font-size: clamp(.66rem, 1.6vw, .78rem);
+    }
+    #term-row span { color: var(--g); white-space: nowrap; }
+    #term-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: #00cc88; font-family: 'Courier New', monospace;
+      font-size: clamp(.66rem, 1.6vw, .78rem); caret-color: var(--g);
+    }
+
     footer { text-align: center; padding: 3rem 1rem 5.5rem; font-family: 'Orbitron', monospace; letter-spacing: .3em; }
     .fh { font-size: 1.1rem; color: var(--c); text-shadow: 0 0 12px var(--c); margin-bottom: .6rem; }
     .fs { font-size: .58rem; color: rgba(0,229,255,.38); }
 
-    /* ── Responsive ── */
     @media (max-width: 600px) {
-      .ig   { grid-template-columns: 1fr; }
-      .row  { grid-template-columns: 4.2rem 1fr; }
+      .ig  { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 4.2rem 1fr; }
       .hero-dt { letter-spacing: .04em; }
-      #hud  { font-size: .5rem; padding: .38rem .65rem; max-width: 48vw; }
+      #hud { font-size: .5rem; padding: .38rem .65rem; max-width: 48vw; }
       #mbtn { font-size: .58rem; padding: .48rem .8rem; bottom: 1rem; right: 1rem; }
     }
   </style>
@@ -312,6 +430,21 @@
 
 <!-- Audio -->
 <audio id="bgm" src="Cyber.mp3" loop preload="auto"></audio>
+
+<!-- Overload banner -->
+<div id="overload-banner">⚠ EMERGENCY SYSTEM OVERRIDE — CORE MELTDOWN IMMINENT ⚠</div>
+
+<!-- ══════════════════════════════════════
+     CUSTOM CURSOR RETICLE
+══════════════════════════════════════ -->
+<div id="reticle">
+  <div class="rh"></div>
+  <div class="rv"></div>
+  <div class="rc tl"></div><div class="rc tr"></div>
+  <div class="rc bl"></div><div class="rc br"></div>
+  <div class="rdot"></div>
+  <div id="rlabel">LOCK ON</div>
+</div>
 
 <!-- ══════════════════════════════════════
      BOOT OVERLAY
@@ -328,9 +461,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     HUD (fixed top-right)
-══════════════════════════════════════ -->
+<!-- HUD -->
 <div id="hud">
   <div id="hud-t">SYSTEM TIME: 00:00:00.000</div>
   <div id="hud-cd">MISSION START IN [ --:--:-- ]</div>
@@ -340,25 +471,47 @@
 <button id="mbtn" onclick="toggleMusic()">♪ BGM OFF</button>
 
 <!-- ══════════════════════════════════════
+     BIO-AUTH OVERLAY
+══════════════════════════════════════ -->
+<div id="bio-ov">
+  <div class="bio-box">
+    <div class="bio-title">⬡ BIOMETRIC AUTHENTICATION ⬡</div>
+    <div class="bio-ring-wrap"><div class="bio-ring"></div></div>
+    <div class="bio-prog"><div id="bio-bar"></div></div>
+    <div id="bio-status">STANDBY...</div>
+    <div id="bio-secret">
+      <div class="ok-msg">✓ IDENTITY CONFIRMED — ACCESS GRANTED</div>
+      <div class="secret-info">
+        幹事 <strong style="color:var(--g)">Teramoto</strong> まで直接ご連絡ください<br>
+        LINE または SMS にて参加表明をお願いします<br><br>
+        <span style="color:var(--m)">SECRET:</span> 17:30 現地集合でよろしく！<br>
+        <span style="color:var(--m)">SECRET:</span> 一次会終了後、二次会は交渉次第
+      </div>
+    </div>
+    <div class="bio-close-hint">[ ESC ] or tap outside to close</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      MAIN CONTENT
 ══════════════════════════════════════ -->
 <div id="app">
 
-  <!-- ── HERO ── -->
+  <!-- HERO -->
   <div class="hero">
     <div class="co tl"></div><div class="co tr"></div>
     <div class="co bl"></div><div class="co br"></div>
     <div class="badge">▶ EVENT INFORMATION 2026.06.10</div>
-    <h1>
+    <h1 id="hero-h1">
       <span class="gt" data-t="CLAUDE WORK LAB">CLAUDE WORK LAB</span>
-      <span class="night">夜の部</span>
+      <span class="night" id="hero-night">夜の部</span>
     </h1>
     <div class="hero-dt">2026 / 06 / 10 &nbsp;|&nbsp; 17:45 START</div>
   </div>
 
   <div class="div"></div>
 
-  <!-- ── EVENT DETAILS ── -->
+  <!-- EVENT DETAILS -->
   <section>
     <div class="sl">EVENT DETAILS</div>
     <div class="card">
@@ -378,11 +531,12 @@
         <div class="val"><strong>Teramoto</strong></div>
       </div>
     </div>
+    <button id="part-btn" onclick="startBioAuth()">▶ RSVP / 参加表明</button>
   </section>
 
   <div class="div"></div>
 
-  <!-- ── RESTAURANT ── -->
+  <!-- RESTAURANT -->
   <section>
     <div class="sl">RESTAURANT</div>
     <img class="img-f" src="image/shop.png" alt="龍馬商店 新橋店">
@@ -391,7 +545,7 @@
 
   <div class="div"></div>
 
-  <!-- ── FEATURED DISH ── -->
+  <!-- FEATURED DISH -->
   <section>
     <div class="sl">FEATURED DISH</div>
     <img class="img-f" src="image/katsuo.jpg" alt="わら焼きカツオのタタキ">
@@ -400,7 +554,7 @@
 
   <div class="div"></div>
 
-  <!-- ── ACCESS ── -->
+  <!-- ACCESS -->
   <section>
     <div class="sl">ACCESS</div>
     <div>
@@ -414,7 +568,7 @@
         <div class="cap">▲ 周辺アクセスマップ</div>
       </div>
       <div>
-        <img class="img-f" src="image/floormap.png" alt="ニュー新橋ビル 3Fフロアマップ">
+        <img class="img-f" src="image/floormap.png" alt="3Fフロアマップ">
         <div class="cap">▲ ニュー新橋ビル 3F フロアマップ</div>
       </div>
     </div>
@@ -422,7 +576,7 @@
 
   <div class="div"></div>
 
-  <!-- ── QR ── -->
+  <!-- QR -->
   <section>
     <div class="sl">SHARE THIS PAGE</div>
     <div class="qr">
@@ -433,26 +587,39 @@
 
   <div class="div"></div>
 
-  <!-- ── FOOTER ── -->
+  <!-- SYSTEM LOG (TERMINAL) -->
+  <section>
+    <div class="sl">SYSTEM LOG — LIVE FEED</div>
+    <div id="term"></div>
+    <div id="term-row">
+      <span>operative@cwl-night:~$&nbsp;</span>
+      <input id="term-input" type="text" autocomplete="off" spellcheck="false"
+             placeholder="type 'help' and press Enter...">
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <!-- FOOTER -->
   <footer>
     <div class="fh">ORGANIZER : TERAMOTO</div>
     <div class="fs">CLAUDE WORK LAB 夜の部 &nbsp;|&nbsp; 2026.06.10</div>
+    <div class="fs" style="margin-top:.8rem; font-size:.52rem; opacity:.35">
+      ↑↑↓↓←→←→BA
+    </div>
   </footer>
 
 </div><!-- #app -->
 
 <script>
-/* ─────────────────────────────────────────────────
-   UTILITIES
-───────────────────────────────────────────────── */
+/* ─── UTILS ─────────────────────────────────────── */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const $  = id => document.getElementById(id);
-const pad = (n, w = 2) => String(n).padStart(w, '0');
+const $     = id => document.getElementById(id);
+const pad   = (n, w = 2) => String(n).padStart(w, '0');
+const esc   = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-/* ─────────────────────────────────────────────────
-   BOOT SEQUENCE
-───────────────────────────────────────────────── */
-const LINES = [
+/* ─── BOOT ──────────────────────────────────────── */
+const BOOT_LINES = [
   'INITIALIZING SECURE CONNECTION',
   'VERIFYING OPERATOR CREDENTIALS',
   'LOADING EVENT DATA: "CLAUDE WORK LAB NIGHT_SESSION"',
@@ -476,8 +643,7 @@ async function runBoot() {
     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} JST`;
 
   const log = $('boot-log');
-
-  for (const entry of LINES) {
+  for (const entry of BOOT_LINES) {
     const str    = typeof entry === 'string' ? entry : entry.text;
     const suffix = typeof entry === 'object' && entry.suffix ? entry.suffix : '[OK]';
     const plain  = typeof entry === 'object' && entry.plain;
@@ -496,7 +662,6 @@ async function runBoot() {
     }
     await sleep(130);
   }
-
   $('boot-cur').style.display = 'none';
   $('boot-enter').style.display = 'block';
 }
@@ -509,20 +674,18 @@ function dismissBoot() {
     boot.style.display = 'none';
     $('app').style.opacity = '1';
     scheduleGlitch();
+    initTerminal();
   }, 820);
   startMusic();
 }
 
-/* ─────────────────────────────────────────────────
-   HUD  — clock + countdown
-───────────────────────────────────────────────── */
+/* ─── HUD ───────────────────────────────────────── */
 const MISSION = new Date('2026-06-10T17:45:00+09:00');
 
 function tickHUD() {
   const now = new Date();
   $('hud-t').textContent =
-    `SYSTEM TIME: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(), 3)}`;
-
+    `SYSTEM TIME: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(),3)}`;
   const diff = MISSION - now;
   const cd   = $('hud-cd');
   if (diff > 0) {
@@ -536,41 +699,29 @@ function tickHUD() {
   requestAnimationFrame(tickHUD);
 }
 
-/* ─────────────────────────────────────────────────
-   GLITCH
-───────────────────────────────────────────────── */
+/* ─── GLITCH ────────────────────────────────────── */
 function triggerGlitch() {
   const el = document.querySelector('.gt');
   if (!el || el.classList.contains('go')) return;
   el.classList.add('go');
   setTimeout(() => el.classList.remove('go'), 400);
 }
-
 function scheduleGlitch() {
-  setTimeout(() => { triggerGlitch(); scheduleGlitch(); },
-    5000 + Math.random() * 5000);
+  setTimeout(() => { triggerGlitch(); scheduleGlitch(); }, 5000 + Math.random() * 5000);
 }
+document.querySelector('.gt')?.addEventListener('mouseenter', triggerGlitch);
 
-document.querySelector('.gt')
-  ?.addEventListener('mouseenter', triggerGlitch);
-
-/* ─────────────────────────────────────────────────
-   MUSIC
-───────────────────────────────────────────────── */
+/* ─── MUSIC ─────────────────────────────────────── */
 let playing = false;
-
 function startMusic() {
   const a = $('bgm');
   a.volume = 0.45;
   a.play().then(() => { playing = true; updateMBtn(); }).catch(() => {});
 }
-
 function toggleMusic() {
-  const a = $('bgm');
-  playing ? (a.pause(), playing = false) : (a.play(), playing = true);
+  playing ? ($('bgm').pause(), playing = false) : ($('bgm').play(), playing = true);
   updateMBtn();
 }
-
 function updateMBtn() {
   const b = $('mbtn');
   b.textContent = playing ? '♪ BGM ON' : '♪ BGM OFF';
@@ -578,8 +729,234 @@ function updateMBtn() {
 }
 
 /* ─────────────────────────────────────────────────
-   INIT
+   ④ BIO-AUTH
 ───────────────────────────────────────────────── */
+async function startBioAuth() {
+  const ov = $('bio-ov');
+  ov.classList.add('show');
+
+  const bar    = $('bio-bar');
+  const status = $('bio-status');
+  $('bio-secret').style.display = 'none';
+
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  await sleep(30);
+
+  const steps = [
+    { text: 'ACCESS REQUESTED...', dur: 700, pct: 15 },
+    { text: 'SCANNING BIOMETRICS...', dur: 1100, pct: 42 },
+    { text: 'VERIFYING RETINAL PATTERN...', dur: 900, pct: 68 },
+    { text: 'CROSS-REFERENCING INVITE CODE...', dur: 800, pct: 88 },
+    { text: 'DECRYPTING CREDENTIALS...', dur: 600, pct: 100 },
+  ];
+
+  for (const s of steps) {
+    status.textContent = s.text;
+    bar.style.transition = `width ${s.dur}ms linear`;
+    bar.style.width = s.pct + '%';
+    await sleep(s.dur + 80);
+  }
+
+  status.style.animation = 'none';
+  status.textContent = '✓ AUTHENTICATION COMPLETE';
+  $('bio-secret').style.display = 'block';
+}
+
+$('bio-ov').addEventListener('click', e => {
+  if (e.target === $('bio-ov')) closeBioAuth();
+});
+
+function closeBioAuth() {
+  $('bio-ov').classList.remove('show');
+  setTimeout(() => {
+    $('bio-status').style.animation = '';
+    $('bio-status').textContent = 'STANDBY...';
+    $('bio-bar').style.width = '0%';
+    $('bio-secret').style.display = 'none';
+  }, 400);
+}
+
+/* ─────────────────────────────────────────────────
+   ⑤ PSEUDO TERMINAL
+───────────────────────────────────────────────── */
+const AUTO_LOGS = [
+  { t:'info', m:'Monitoring atmospheric conditions in Shinbashi...' },
+  { t:'alert',m:'ALERT: High concentration of ethanol detected near target zone.' },
+  { t:'info', m:'SYSTEM: Operative alcohol-tolerance parameters initialized.' },
+  { t:'info', m:'Location lock confirmed: New Shinbashi Bldg 3F [RYOMA SHOUTEN]' },
+  { t:'alert',m:'ALERT: Katsuo-tataki inventory at critical levels. Reordering...' },
+  { t:'info', m:'Tracking TERAMOTO — status: MISSION READY ✓' },
+  { t:'alert',m:'ALERT: Beer temperature optimal. Recommend immediate deployment.' },
+  { t:'info', m:'Straw-fire sensor calibrated. Katsuo burn trajectory: nominal.' },
+  { t:'info', m:'Social interaction module loaded: IZAKAYA_MODE.dll v4.2' },
+  { t:'alert',m:'ALERT: Next Yokosuka Line departs 新橋 in 8 minutes — hold position.' },
+  { t:'info', m:'Decrypting secret menu... [KATSUO_TATAKI_EXTRA_RARE: UNLOCKED]' },
+  { t:'info', m:'Memory buffer: 512MB reserved for post-mission anecdotes.' },
+  { t:'alert',m:'WARNING: Excessive laughter levels — civilian attraction risk HIGH.' },
+  { t:'info', m:'SYSTEM: Karaoke failsafe DISABLED by admin TERAMOTO.' },
+  { t:'alert',m:'ALERT: Ryoma statue sighted on 3F. Approach with reverence.' },
+];
+
+let autoIdx = 0;
+
+function addTermLog(msg, type = 'info') {
+  const term = $('term');
+  if (!term) return;
+  const now = new Date();
+  const ts  = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const typeSpan = type === 'alert' ? `<span class="tl-al">[ALERT]</span>` :
+                   type === 'cmd'   ? `<span class="tl-cmd">$</span>` :
+                   type === 'ok'    ? `<span class="tl-ok">[OK]</span>` :
+                                      `<span class="tl-info">[INFO]</span>`;
+  const line = document.createElement('div');
+  line.className = 'tl-line';
+  line.innerHTML = `<span class="tl-ts">[${ts}]</span> ${typeSpan} ${esc(msg)}`;
+  term.appendChild(line);
+  term.scrollTop = term.scrollHeight;
+}
+
+function scheduleAutoLog() {
+  setTimeout(() => {
+    const { t, m } = AUTO_LOGS[autoIdx % AUTO_LOGS.length];
+    addTermLog(m, t);
+    autoIdx++;
+    scheduleAutoLog();
+  }, 3200 + Math.random() * 4500);
+}
+
+function initTerminal() {
+  addTermLog('Terminal online. System surveillance active.', 'ok');
+  addTermLog('Type "help" for operator commands.', 'info');
+  scheduleAutoLog();
+}
+
+$('term-input').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const cmd = e.target.value.trim().toLowerCase();
+  if (!cmd) return;
+  e.target.value = '';
+  addTermLog(cmd, 'cmd');
+
+  switch (cmd) {
+    case 'help':
+      addTermLog('─── CLASSIFIED INTEL FROM: TERAMOTO ───', 'ok');
+      addTermLog('幹事メッセージ: 遅刻厳禁！17:30 現地集合でお願いします', 'info');
+      addTermLog('SECRET MENU: 鰹のたたき 10人前 特別注文済み', 'info');
+      addTermLog('二次会: 現地で交渉次第（作戦続行の意思あり）', 'info');
+      addTermLog('HINT: ↑↑↓↓←→←→BA で緊急モードが発動します', 'alert');
+      addTermLog('─────────────────────────────────────', 'ok');
+      break;
+    case 'status':
+      addTermLog(`BGM: ${playing ? 'ONLINE' : 'OFFLINE'}`, 'info');
+      addTermLog('MISSION STATUS: ACTIVE', 'info');
+      addTermLog('OPERATIVE COUNT: 未確定', 'info');
+      break;
+    case 'ls':
+      addTermLog('drinks/  food/  secrets/  teramoto.exe  katsuo.dat', 'info');
+      break;
+    case 'whoami':
+      addTermLog('CLASSIFIED OPERATIVE — CLEARANCE LEVEL 5', 'info');
+      break;
+    case 'clear':
+      $('term').innerHTML = '';
+      break;
+    case 'date':
+      addTermLog(new Date().toString(), 'info');
+      break;
+    case 'konami':
+      addTermLog('↑↑↓↓←→←→BA ...', 'alert');
+      break;
+    default:
+      addTermLog(`command not found: ${esc(cmd)}`, 'alert');
+      addTermLog('type "help" for available commands.', 'info');
+  }
+});
+
+/* ─────────────────────────────────────────────────
+   ⑥ KONAMI CODE + OVERLOAD MODE
+───────────────────────────────────────────────── */
+const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+let ki = 0, isOverload = false;
+
+document.addEventListener('keydown', e => {
+  if (e.keyCode === 27) {
+    if ($('bio-ov').classList.contains('show')) { closeBioAuth(); return; }
+    if (isOverload) { toggleOverload(); return; }
+  }
+  if (e.keyCode === KONAMI[ki]) {
+    if (++ki === KONAMI.length) { ki = 0; toggleOverload(); }
+  } else {
+    ki = (e.keyCode === KONAMI[0]) ? 1 : 0;
+  }
+});
+
+let tapCount = 0, tapTimer;
+$('hero-h1')?.addEventListener('click', () => {
+  clearTimeout(tapTimer);
+  tapCount++;
+  tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
+  if (tapCount >= 5) { tapCount = 0; toggleOverload(); }
+});
+
+function toggleOverload() {
+  isOverload = !isOverload;
+  document.body.classList.toggle('overload', isOverload);
+
+  const gt    = document.querySelector('.gt');
+  const night = $('hero-night');
+
+  if (isOverload) {
+    gt.textContent = '[ SYSTEM OVERRIDE ]';
+    gt.setAttribute('data-t', '[ SYSTEM OVERRIDE ]');
+    night.textContent = '⚠ MELTDOWN ⚠';
+    addTermLog('EMERGENCY OVERRIDE ACTIVATED — ALL SYSTEMS CRITICAL', 'alert');
+    addTermLog('Press [ESC] or Konami code again to restore.', 'info');
+  } else {
+    gt.textContent = 'CLAUDE WORK LAB';
+    gt.setAttribute('data-t', 'CLAUDE WORK LAB');
+    night.textContent = '夜の部';
+    addTermLog('System restored to nominal parameters.', 'ok');
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   ⑦ CUSTOM CURSOR RETICLE
+───────────────────────────────────────────────── */
+(function () {
+  const ret = $('reticle');
+  if (!ret) return;
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  let tx = -200, ty = -200;
+  let cx = -200, cy = -200;
+  let raf;
+
+  document.addEventListener('mousemove', e => {
+    tx = e.clientX; ty = e.clientY;
+    if (ret.style.display === 'none' || ret.style.display === '') ret.style.display = 'block';
+  });
+
+  function animate() {
+    cx += (tx - cx) * 0.14;
+    cy += (ty - cy) * 0.14;
+    ret.style.left = cx + 'px';
+    ret.style.top  = cy + 'px';
+    raf = requestAnimationFrame(animate);
+  }
+  animate();
+
+  const lockTargets = 'a, button, input, [onclick]';
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(lockTargets)) ret.classList.add('lock');
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(lockTargets)) ret.classList.remove('lock');
+  });
+})();
+
+/* ─── INIT ──────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
   requestAnimationFrame(tickHUD);
   runBoot();

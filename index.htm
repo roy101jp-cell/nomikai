@@ -7,384 +7,583 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cyan:    #00e5ff;
-      --magenta: #ff2d7a;
-      --blue:    #2979ff;
-      --dark:    #050510;
-      --text:    #cce8f0;
+      --c:  #00e5ff;          /* cyan  */
+      --g:  #00ffcc;          /* green */
+      --m:  #ff2d7a;          /* magenta */
+      --b:  #2979ff;          /* blue  */
+      --bg: #050510;
+      --tx: #cce8f0;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--dark);
-      color: var(--text);
+      background: var(--bg);
+      color: var(--tx);
       font-family: 'Meiryo', 'Yu Gothic', sans-serif;
       overflow-x: hidden;
     }
 
-    /* グリッド背景 */
+    /* Grid overlay */
     body::before {
-      content: '';
-      position: fixed; inset: 0;
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
-        linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+        linear-gradient(rgba(0,229,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,.04) 1px, transparent 1px);
       background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
     }
 
-    /* スキャンライン */
+    /* Scanlines */
     body::after {
-      content: '';
-      position: fixed; inset: 0;
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
+        rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px
       );
-      pointer-events: none;
-      z-index: 0;
     }
 
-    .wrap { position: relative; z-index: 1; }
+    /* CRT sweep line */
+    #crt {
+      position: fixed; left: 0; right: 0; height: 2px; z-index: 1; pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,.07), transparent);
+      animation: sweep 10s linear infinite;
+    }
+    @keyframes sweep { from { top: -2px; } to { top: 100vh; } }
 
-    /* ─── HERO ─── */
+    /* ═══════════════════════════════════════
+       BOOT OVERLAY
+    ═══════════════════════════════════════ */
+    #boot {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #000;
+      display: flex; flex-direction: column;
+      justify-content: flex-start;
+      padding: clamp(1.5rem, 5vw, 4rem);
+      transition: opacity .8s ease;
+      overflow: hidden;
+    }
+
+    #boot-hdr {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(.62rem, 1.8vw, .82rem);
+      color: var(--g); text-shadow: 0 0 8px var(--g);
+      border-bottom: 1px solid rgba(0,255,204,.2);
+      padding-bottom: 1rem; margin-bottom: 1.5rem; width: 100%;
+    }
+    #boot-hdr .t {
+      font-size: clamp(.78rem, 2.2vw, 1.05rem);
+      letter-spacing: .3em; margin-bottom: .35rem;
+    }
+
+    #boot-log {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(.62rem, 1.8vw, .86rem);
+      line-height: 1.9; flex: 1; width: 100%;
+    }
+    .bl     { color: #999; word-break: break-all; }
+    .bl .ok { color: var(--g); }
+
+    #boot-cur {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(.62rem, 1.8vw, .86rem);
+      color: var(--g); animation: blink .7s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    #boot-enter { margin-top: 2rem; display: none; text-align: center; }
+    #boot-enter button {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(.78rem, 2.2vw, 1rem);
+      letter-spacing: .3em; color: var(--g);
+      background: transparent; border: 1px solid var(--g);
+      padding: .9rem clamp(1.5rem, 5vw, 3rem);
+      cursor: pointer;
+      text-shadow: 0 0 10px var(--g);
+      box-shadow: 0 0 20px rgba(0,255,204,.25), inset 0 0 20px rgba(0,255,204,.05);
+      animation: pulse-e 1.4s ease-in-out infinite;
+      transition: box-shadow .3s;
+    }
+    #boot-enter button:hover {
+      box-shadow: 0 0 40px rgba(0,255,204,.5), inset 0 0 20px rgba(0,255,204,.12);
+    }
+    @keyframes pulse-e {
+      0%,100% { box-shadow: 0 0 20px rgba(0,255,204,.25), inset 0 0 20px rgba(0,255,204,.05); }
+      50%      { box-shadow: 0 0 40px rgba(0,255,204,.45), inset 0 0 20px rgba(0,255,204,.1); }
+    }
+
+    /* ═══════════════════════════════════════
+       HUD CLOCK  (fixed top-right)
+    ═══════════════════════════════════════ */
+    #hud {
+      position: fixed; top: 1rem; right: 1rem; z-index: 1000;
+      font-family: 'Courier New', monospace;
+      font-size: clamp(.52rem, 1.3vw, .76rem);
+      color: var(--g); text-shadow: 0 0 8px var(--g);
+      text-align: right; line-height: 1.8;
+      background: rgba(0,255,204,.03);
+      border: 1px solid rgba(0,255,204,.2);
+      padding: .5rem .85rem;
+      box-shadow: 0 0 12px rgba(0,255,204,.07);
+      pointer-events: none;
+    }
+    #hud-cd.mission { color: var(--m); text-shadow: 0 0 8px var(--m); }
+
+    /* ═══════════════════════════════════════
+       MUSIC BUTTON  (fixed bottom-right)
+    ═══════════════════════════════════════ */
+    #mbtn {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000;
+      font-family: 'Orbitron', monospace; font-size: .62rem; letter-spacing: .18em;
+      color: var(--c); background: rgba(0,229,255,.05);
+      border: 1px solid var(--c); padding: .55rem 1rem;
+      cursor: pointer; transition: box-shadow .3s, border-color .3s, color .3s;
+      box-shadow: 0 0 10px rgba(0,229,255,.18);
+    }
+    #mbtn:hover { box-shadow: 0 0 22px rgba(0,229,255,.4); }
+    #mbtn.on { border-color: var(--g); color: var(--g); box-shadow: 0 0 10px rgba(0,255,204,.25); }
+
+    /* ═══════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════ */
+    #app {
+      position: relative; z-index: 1;
+      opacity: 0; transition: opacity .9s ease;
+    }
+
+    /* ── Hero ── */
     .hero {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
       text-align: center;
-      padding: 3rem 1.5rem;
-      position: relative;
+      padding: 4rem 1.5rem; position: relative;
     }
 
-    .corner {
-      position: absolute;
-      width: 64px; height: 64px;
-    }
-    .corner.tl { top: 1.5rem; left: 1.5rem;
-      border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan);
-      box-shadow: -4px -4px 12px var(--cyan); }
-    .corner.tr { top: 1.5rem; right: 1.5rem;
-      border-top: 2px solid var(--cyan); border-right: 2px solid var(--cyan);
-      box-shadow: 4px -4px 12px var(--cyan); }
-    .corner.bl { bottom: 1.5rem; left: 1.5rem;
-      border-bottom: 2px solid var(--cyan); border-left: 2px solid var(--cyan);
-      box-shadow: -4px 4px 12px var(--cyan); }
-    .corner.br { bottom: 1.5rem; right: 1.5rem;
-      border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan);
-      box-shadow: 4px 4px 12px var(--cyan); }
+    .co { position: absolute; width: 56px; height: 56px; }
+    .co.tl { top:1.5rem; left:1.5rem;
+      border-top:2px solid var(--c); border-left:2px solid var(--c);
+      box-shadow: -3px -3px 10px var(--c); }
+    .co.tr { top:1.5rem; right:1.5rem;
+      border-top:2px solid var(--c); border-right:2px solid var(--c);
+      box-shadow: 3px -3px 10px var(--c); }
+    .co.bl { bottom:1.5rem; left:1.5rem;
+      border-bottom:2px solid var(--c); border-left:2px solid var(--c);
+      box-shadow: -3px 3px 10px var(--c); }
+    .co.br { bottom:1.5rem; right:1.5rem;
+      border-bottom:2px solid var(--c); border-right:2px solid var(--c);
+      box-shadow: 3px 3px 10px var(--c); }
 
-    .hero-badge {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.5em;
-      color: var(--cyan);
-      text-shadow: 0 0 10px var(--cyan);
-      margin-bottom: 1.5rem;
-      animation: blink 2.5s step-end infinite;
+    .badge {
+      font-family: 'Orbitron', monospace; font-size: .68rem; letter-spacing: .5em;
+      color: var(--c); text-shadow: 0 0 10px var(--c);
+      margin-bottom: 1.5rem; animation: blink 2.5s step-end infinite;
     }
 
     .hero h1 {
-      font-family: 'Orbitron', monospace;
-      font-weight: 900;
-      font-size: clamp(1.8rem, 6vw, 4rem);
-      color: #fff;
-      letter-spacing: 0.06em;
-      line-height: 1.2;
-      animation: pulse 3s ease-in-out infinite;
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: clamp(1.6rem, 5.5vw, 3.8rem);
+      color: #fff; letter-spacing: .06em; line-height: 1.2;
+      animation: glow-title 3s ease-in-out infinite;
     }
-
     .hero h1 .night {
-      display: block;
-      font-size: clamp(3rem, 10vw, 7rem);
-      color: var(--cyan);
+      display: block; font-size: clamp(2.8rem, 9vw, 6.5rem); color: var(--c);
+    }
+    @keyframes glow-title {
+      0%,100% { text-shadow: 0 0 10px var(--c),0 0 24px var(--c),0 0 48px var(--b); }
+      50%      { text-shadow: 0 0 20px var(--c),0 0 50px var(--c),0 0 100px var(--b); }
     }
 
-    .hero-date {
-      margin-top: 2rem;
-      padding: 0.9rem 2.5rem;
-      border: 1px solid var(--cyan);
-      box-shadow: 0 0 18px var(--cyan), inset 0 0 18px rgba(0,229,255,0.06);
+    /* Glitch on title text */
+    .gt { position: relative; display: inline-block; }
+    .gt::before, .gt::after {
+      content: attr(data-t); position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%; opacity: 0;
+    }
+    .gt::before { color: var(--m); }
+    .gt::after  { color: var(--g); }
+
+    .gt.go::before { opacity:1; animation: ga .36s steps(3, end) forwards; }
+    .gt.go::after  { opacity:1; animation: gb .36s steps(3, end) forwards; }
+
+    @keyframes ga {
+      0%  { clip-path:inset(20% 0 65% 0); transform:translate(-6px,0); }
+      33% { clip-path:inset(70% 0 10% 0); transform:translate(6px,0); }
+      66% { clip-path:inset(40% 0 42% 0); transform:translate(-3px,0); }
+      100%{ clip-path:inset(100% 0 0 0);  transform:translate(0); }
+    }
+    @keyframes gb {
+      0%  { clip-path:inset(60% 0 20% 0); transform:translate(6px,0); }
+      33% { clip-path:inset(10% 0 75% 0); transform:translate(-6px,0); }
+      66% { clip-path:inset(80% 0  5% 0); transform:translate(3px,0); }
+      100%{ clip-path:inset(100% 0 0 0);  transform:translate(0); }
+    }
+
+    .hero-dt {
+      margin-top: 2rem; padding: .85rem clamp(1rem, 4vw, 2.5rem);
+      border: 1px solid var(--c);
+      box-shadow: 0 0 18px var(--c), inset 0 0 18px rgba(0,229,255,.05);
       font-family: 'Orbitron', monospace;
-      font-size: clamp(1rem, 3vw, 1.4rem);
-      letter-spacing: 0.12em;
-      color: var(--cyan);
-      text-shadow: 0 0 12px var(--cyan);
+      font-size: clamp(.88rem, 2.6vw, 1.3rem);
+      letter-spacing: .1em; color: var(--c); text-shadow: 0 0 12px var(--c);
     }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.25; }
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        text-shadow: 0 0 10px var(--cyan), 0 0 24px var(--cyan), 0 0 48px var(--blue);
-      }
-      50% {
-        text-shadow: 0 0 20px var(--cyan), 0 0 50px var(--cyan), 0 0 100px var(--blue), 0 0 160px var(--cyan);
-      }
-    }
-
-    /* ─── DIVIDER ─── */
-    .divider {
+    /* ── Divider ── */
+    .div {
       height: 1px;
-      background: linear-gradient(to right, transparent, var(--cyan), transparent);
-      margin: 0 1.5rem;
-      opacity: 0.35;
+      background: linear-gradient(to right, transparent, var(--c), transparent);
+      margin: 0 1.5rem; opacity: .3;
     }
 
-    /* ─── SECTIONS ─── */
+    /* ── Sections ── */
     section { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.2rem; }
-
-    .sec-label {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.45em;
-      color: var(--magenta);
-      text-shadow: 0 0 8px var(--magenta);
-      margin-bottom: 1.2rem;
+    .sl {
+      font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: .45em;
+      color: var(--m); text-shadow: 0 0 8px var(--m); margin-bottom: 1.2rem;
     }
-    .sec-label::before { content: '// '; }
+    .sl::before { content: '// '; }
 
-    /* INFO CARD */
-    .info-card {
-      border: 1px solid var(--cyan);
-      padding: 2rem;
-      box-shadow: 0 0 24px rgba(0,229,255,0.18), inset 0 0 24px rgba(0,229,255,0.03);
+    /* ── Info card ── */
+    .card {
+      border: 1px solid var(--c); padding: 2rem;
+      box-shadow: 0 0 24px rgba(0,229,255,.14), inset 0 0 24px rgba(0,229,255,.03);
       position: relative;
     }
-    .info-card::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: 24px;
-      width: 40px; height: 2px;
-      background: var(--dark);
+    .card::before {
+      content: ''; position: absolute; top: -1px; left: 24px;
+      width: 40px; height: 2px; background: var(--bg);
     }
 
-    .info-row {
-      display: grid;
-      grid-template-columns: 5.5rem 1fr;
-      gap: 0.8rem 1.5rem;
-      margin-bottom: 1.4rem;
-      align-items: start;
+    .row { display: grid; grid-template-columns: 5.5rem 1fr; gap: .8rem 1.5rem; margin-bottom: 1.4rem; align-items: start; }
+    .row:last-child { margin-bottom: 0; }
+    .lbl {
+      font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: .2em;
+      color: var(--m); text-shadow: 0 0 8px var(--m); padding-top: .3rem;
     }
-    .info-row:last-child { margin-bottom: 0; }
+    .val { color: #fff; line-height: 1.8; font-size: 1rem; }
+    .val strong { display: block; font-size: 1.1rem; color: var(--c); text-shadow: 0 0 8px var(--c); margin-bottom: .1rem; }
 
-    .info-lbl {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.2em;
-      color: var(--magenta);
-      text-shadow: 0 0 8px var(--magenta);
-      padding-top: 0.3rem;
-    }
-
-    .info-val { color: #fff; line-height: 1.8; font-size: 1rem; }
-    .info-val strong {
-      display: block;
-      font-size: 1.15rem;
-      color: var(--cyan);
-      text-shadow: 0 0 8px var(--cyan);
-      margin-bottom: 0.1rem;
-    }
-
-    /* IMAGES */
-    .img-full {
+    /* ── Images ── */
+    .img-f {
       width: 100%; display: block;
-      border: 1px solid rgba(0,229,255,0.3);
-      box-shadow: 0 0 24px rgba(0,229,255,0.12);
+      border: 1px solid rgba(0,229,255,.28);
+      box-shadow: 0 0 20px rgba(0,229,255,.1);
       filter: saturate(1.15) contrast(1.05);
     }
-
-    .img-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+    .ig { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .cap {
+      font-family: 'Orbitron', monospace; font-size: .56rem; letter-spacing: .2em;
+      color: var(--c); opacity: .6; text-align: center; margin-top: .5rem;
     }
 
-    .img-cap {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      color: var(--cyan);
-      opacity: 0.65;
-      text-align: center;
-      margin-top: 0.5rem;
+    /* ── Map button ── */
+    .mbtn-a {
+      display: inline-flex; align-items: center; gap: .5rem;
+      color: var(--c); text-decoration: none;
+      font-family: 'Orbitron', monospace; font-size: .68rem; letter-spacing: .2em;
+      border: 1px solid var(--c); padding: .55rem 1.2rem;
+      box-shadow: 0 0 12px rgba(0,229,255,.22);
+      transition: box-shadow .3s; margin-bottom: 1.2rem;
     }
+    .mbtn-a:hover { box-shadow: 0 0 24px var(--c), inset 0 0 10px rgba(0,229,255,.08); }
 
-    /* MAP LINK */
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--cyan);
-      text-decoration: none;
-      font-family: 'Orbitron', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      border: 1px solid var(--cyan);
-      padding: 0.55rem 1.2rem;
-      box-shadow: 0 0 12px rgba(0,229,255,0.3);
-      transition: box-shadow 0.3s;
-      margin-bottom: 1.2rem;
-    }
-    .map-btn:hover {
-      box-shadow: 0 0 24px var(--cyan), inset 0 0 12px rgba(0,229,255,0.1);
-    }
+    /* ── QR ── */
+    .qr { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+    .qr img { width: 200px; height: 200px; border: 2px solid var(--c); box-shadow: 0 0 24px var(--c); padding: 10px; background: #fff; }
 
-    /* QR */
-    .qr-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .qr-wrap img {
-      width: 200px; height: 200px;
-      border: 2px solid var(--cyan);
-      box-shadow: 0 0 24px var(--cyan);
-      padding: 10px;
-      background: #fff;
-    }
+    /* ── Footer ── */
+    footer { text-align: center; padding: 3rem 1rem 5.5rem; font-family: 'Orbitron', monospace; letter-spacing: .3em; }
+    .fh { font-size: 1.1rem; color: var(--c); text-shadow: 0 0 12px var(--c); margin-bottom: .6rem; }
+    .fs { font-size: .58rem; color: rgba(0,229,255,.38); }
 
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 3rem 1rem 4rem;
-      font-family: 'Orbitron', monospace;
-      letter-spacing: 0.3em;
-    }
-    .footer-host {
-      font-size: 1.1rem;
-      color: var(--cyan);
-      text-shadow: 0 0 12px var(--cyan);
-      margin-bottom: 0.6rem;
-    }
-    .footer-sub {
-      font-size: 0.65rem;
-      color: rgba(0,229,255,0.4);
-    }
-
-    @media (max-width: 580px) {
-      .img-grid { grid-template-columns: 1fr; }
-      .info-row  { grid-template-columns: 4.5rem 1fr; }
-      .hero-date { padding: 0.8rem 1.2rem; letter-spacing: 0.06em; }
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .ig   { grid-template-columns: 1fr; }
+      .row  { grid-template-columns: 4.2rem 1fr; }
+      .hero-dt { letter-spacing: .04em; }
+      #hud  { font-size: .5rem; padding: .38rem .65rem; max-width: 48vw; }
+      #mbtn { font-size: .58rem; padding: .48rem .8rem; bottom: 1rem; right: 1rem; }
     }
   </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- ═══ HERO ═══ -->
+<!-- CRT sweep -->
+<div id="crt"></div>
+
+<!-- Audio -->
+<audio id="bgm" src="Cyber.mp3" loop preload="auto"></audio>
+
+<!-- ══════════════════════════════════════
+     BOOT OVERLAY
+══════════════════════════════════════ -->
+<div id="boot">
+  <div id="boot-hdr">
+    <div class="t">▓ SECURE TERMINAL v3.14 ▓ ACCESS LEVEL 5</div>
+    <div>OPERATOR: CLASSIFIED &nbsp;|&nbsp; TIMESTAMP: <span id="bts"></span></div>
+  </div>
+  <div id="boot-log"></div>
+  <span id="boot-cur">█</span>
+  <div id="boot-enter">
+    <button onclick="dismissBoot()">[ ▶ &nbsp; ENTER ]</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HUD (fixed top-right)
+══════════════════════════════════════ -->
+<div id="hud">
+  <div id="hud-t">SYSTEM TIME: 00:00:00.000</div>
+  <div id="hud-cd">MISSION START IN [ --:--:-- ]</div>
+</div>
+
+<!-- Music toggle -->
+<button id="mbtn" onclick="toggleMusic()">♪ BGM OFF</button>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── HERO ── -->
   <div class="hero">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-
-    <div class="hero-badge">▶ EVENT INFORMATION 2026.06.10</div>
+    <div class="co tl"></div><div class="co tr"></div>
+    <div class="co bl"></div><div class="co br"></div>
+    <div class="badge">▶ EVENT INFORMATION 2026.06.10</div>
     <h1>
-      CLAUDE WORK LAB
+      <span class="gt" data-t="CLAUDE WORK LAB">CLAUDE WORK LAB</span>
       <span class="night">夜の部</span>
     </h1>
-    <div class="hero-date">2026 / 06 / 10 &nbsp;|&nbsp; 17:45 START</div>
+    <div class="hero-dt">2026 / 06 / 10 &nbsp;|&nbsp; 17:45 START</div>
   </div>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ EVENT DETAILS ═══ -->
+  <!-- ── EVENT DETAILS ── -->
   <section>
-    <div class="sec-label">EVENT DETAILS</div>
-    <div class="info-card">
-      <div class="info-row">
-        <div class="info-lbl">DATE</div>
-        <div class="info-val">
-          <strong>2026年6月10日（水）</strong>
-          17:45 〜
-        </div>
+    <div class="sl">EVENT DETAILS</div>
+    <div class="card">
+      <div class="row">
+        <div class="lbl">DATE</div>
+        <div class="val"><strong>2026年6月10日（水）</strong>17:45 〜</div>
       </div>
-      <div class="info-row">
-        <div class="info-lbl">VENUE</div>
-        <div class="info-val">
+      <div class="row">
+        <div class="lbl">VENUE</div>
+        <div class="val">
           <strong>土佐郷土料理 わら焼き 龍馬商店 新橋駅前店</strong>
           東京都港区新橋２丁目１６−１<br>ニュー新橋ビル 3F
         </div>
       </div>
-      <div class="info-row">
-        <div class="info-lbl">HOST</div>
-        <div class="info-val">
-          <strong>Teramoto</strong>
-        </div>
+      <div class="row">
+        <div class="lbl">HOST</div>
+        <div class="val"><strong>Teramoto</strong></div>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ RESTAURANT ═══ -->
+  <!-- ── RESTAURANT ── -->
   <section>
-    <div class="sec-label">RESTAURANT</div>
-    <img class="img-full" src="image/shop.png" alt="龍馬商店 新橋店">
-    <div class="img-cap">▲ 土佐郷土料理 わら焼き 龍馬商店 — ニュー新橋ビル 3F</div>
+    <div class="sl">RESTAURANT</div>
+    <img class="img-f" src="image/shop.png" alt="龍馬商店 新橋店">
+    <div class="cap">▲ 土佐郷土料理 わら焼き 龍馬商店 — ニュー新橋ビル 3F</div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ FEATURED DISH ═══ -->
+  <!-- ── FEATURED DISH ── -->
   <section>
-    <div class="sec-label">FEATURED DISH</div>
-    <img class="img-full" src="image/katsuo.jpg" alt="わら焼きカツオのタタキ">
-    <div class="img-cap">▲ 土佐名物 わら焼きカツオのタタキ</div>
+    <div class="sl">FEATURED DISH</div>
+    <img class="img-f" src="image/katsuo.jpg" alt="わら焼きカツオのタタキ">
+    <div class="cap">▲ 土佐名物 わら焼きカツオのタタキ</div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ ACCESS ═══ -->
+  <!-- ── ACCESS ── -->
   <section>
-    <div class="sec-label">ACCESS</div>
+    <div class="sl">ACCESS</div>
     <div>
-      <a class="map-btn"
+      <a class="mbtn-a"
          href="https://maps.google.com/?q=東京都港区新橋2-16-1+ニュー新橋ビル"
-         target="_blank" rel="noopener">
-        ▶ GOOGLE MAPS で開く
-      </a>
+         target="_blank" rel="noopener">▶ GOOGLE MAPS で開く</a>
     </div>
-    <div class="img-grid">
+    <div class="ig">
       <div>
-        <img class="img-full" src="image/map.png" alt="周辺アクセスマップ">
-        <div class="img-cap">▲ 周辺アクセスマップ</div>
+        <img class="img-f" src="image/map.png" alt="周辺アクセスマップ">
+        <div class="cap">▲ 周辺アクセスマップ</div>
       </div>
       <div>
-        <img class="img-full" src="image/floormap.png" alt="ニュー新橋ビル 3Fフロアマップ">
-        <div class="img-cap">▲ ニュー新橋ビル 3F フロアマップ</div>
+        <img class="img-f" src="image/floormap.png" alt="ニュー新橋ビル 3Fフロアマップ">
+        <div class="cap">▲ ニュー新橋ビル 3F フロアマップ</div>
       </div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ QR CODE ═══ -->
+  <!-- ── QR ── -->
   <section>
-    <div class="sec-label">SHARE THIS PAGE</div>
-    <div class="qr-wrap">
-      <img src="image/qr.png" alt="このページのQRコード">
-      <div class="img-cap">▲ このページのQRコード — 配布・印刷用</div>
+    <div class="sl">SHARE THIS PAGE</div>
+    <div class="qr">
+      <img src="image/qr.png" alt="QRコード">
+      <div class="cap">▲ このページのQRコード — 配布・印刷用</div>
     </div>
   </section>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- ═══ FOOTER ═══ -->
+  <!-- ── FOOTER ── -->
   <footer>
-    <div class="footer-host">ORGANIZER : TERAMOTO</div>
-    <div class="footer-sub">CLAUDE WORK LAB 夜の部 &nbsp;|&nbsp; 2026.06.10</div>
+    <div class="fh">ORGANIZER : TERAMOTO</div>
+    <div class="fs">CLAUDE WORK LAB 夜の部 &nbsp;|&nbsp; 2026.06.10</div>
   </footer>
 
-</div>
+</div><!-- #app -->
+
+<script>
+/* ─────────────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────────────── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const $  = id => document.getElementById(id);
+const pad = (n, w = 2) => String(n).padStart(w, '0');
+
+/* ─────────────────────────────────────────────────
+   BOOT SEQUENCE
+───────────────────────────────────────────────── */
+const LINES = [
+  'INITIALIZING SECURE CONNECTION',
+  'VERIFYING OPERATOR CREDENTIALS',
+  'LOADING EVENT DATA: "CLAUDE WORK LAB NIGHT_SESSION"',
+  'LOCATION TARGETED: SHINBASHI, TOKYO',
+  'SCANNING VENUE: NEW SHINBASHI BLDG 3F',
+  { text: 'DECRYPTING INVITE', suffix: '[COMPLETE]' },
+  { text: 'ACCESS GRANTED. WELCOME, OPERATIVE.', plain: true },
+];
+
+async function typeText(el, str, delay) {
+  for (const ch of str) {
+    el.textContent += ch;
+    await sleep(delay + Math.random() * 8);
+  }
+}
+
+async function runBoot() {
+  const now = new Date();
+  $('bts').textContent =
+    `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ` +
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} JST`;
+
+  const log = $('boot-log');
+
+  for (const entry of LINES) {
+    const str    = typeof entry === 'string' ? entry : entry.text;
+    const suffix = typeof entry === 'object' && entry.suffix ? entry.suffix : '[OK]';
+    const plain  = typeof entry === 'object' && entry.plain;
+    const delay  = str.length > 40 ? 11 : 17;
+
+    const div = document.createElement('div');
+    div.className = 'bl';
+    log.appendChild(div);
+    await typeText(div, str, delay);
+
+    if (!plain) {
+      const sp = document.createElement('span');
+      sp.className = 'ok';
+      sp.textContent = ' ' + suffix;
+      div.appendChild(sp);
+    }
+    await sleep(130);
+  }
+
+  $('boot-cur').style.display = 'none';
+  $('boot-enter').style.display = 'block';
+}
+
+function dismissBoot() {
+  const boot = $('boot');
+  boot.style.pointerEvents = 'none';
+  boot.style.opacity = '0';
+  setTimeout(() => {
+    boot.style.display = 'none';
+    $('app').style.opacity = '1';
+    scheduleGlitch();
+  }, 820);
+  startMusic();
+}
+
+/* ─────────────────────────────────────────────────
+   HUD  — clock + countdown
+───────────────────────────────────────────────── */
+const MISSION = new Date('2026-06-10T17:45:00+09:00');
+
+function tickHUD() {
+  const now = new Date();
+  $('hud-t').textContent =
+    `SYSTEM TIME: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(), 3)}`;
+
+  const diff = MISSION - now;
+  const cd   = $('hud-cd');
+  if (diff > 0) {
+    const s = Math.floor(diff / 1000);
+    cd.textContent = `MISSION START IN [ ${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)} ]`;
+    cd.classList.remove('mission');
+  } else {
+    cd.textContent = '[ MISSION IN PROGRESS ]';
+    cd.classList.add('mission');
+  }
+  requestAnimationFrame(tickHUD);
+}
+
+/* ─────────────────────────────────────────────────
+   GLITCH
+───────────────────────────────────────────────── */
+function triggerGlitch() {
+  const el = document.querySelector('.gt');
+  if (!el || el.classList.contains('go')) return;
+  el.classList.add('go');
+  setTimeout(() => el.classList.remove('go'), 400);
+}
+
+function scheduleGlitch() {
+  setTimeout(() => { triggerGlitch(); scheduleGlitch(); },
+    5000 + Math.random() * 5000);
+}
+
+document.querySelector('.gt')
+  ?.addEventListener('mouseenter', triggerGlitch);
+
+/* ─────────────────────────────────────────────────
+   MUSIC
+───────────────────────────────────────────────── */
+let playing = false;
+
+function startMusic() {
+  const a = $('bgm');
+  a.volume = 0.45;
+  a.play().then(() => { playing = true; updateMBtn(); }).catch(() => {});
+}
+
+function toggleMusic() {
+  const a = $('bgm');
+  playing ? (a.pause(), playing = false) : (a.play(), playing = true);
+  updateMBtn();
+}
+
+function updateMBtn() {
+  const b = $('mbtn');
+  b.textContent = playing ? '♪ BGM ON' : '♪ BGM OFF';
+  playing ? b.classList.add('on') : b.classList.remove('on');
+}
+
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  requestAnimationFrame(tickHUD);
+  runBoot();
+});
+</script>
 </body>
 </html>

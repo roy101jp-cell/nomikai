@@ -436,7 +436,7 @@
 <!-- ══ BOOT ══ -->
 <div id="boot">
   <div id="boot-hdr">
-    <div class="t">▓ SECURE TERMINAL v3.14 ▓</div>
+    <div class="t">■ SECURE TERMINAL v3.14 ■</div>
     <div style="font-size:.72rem;opacity:.7">OPERATOR: CLASSIFIED | <span id="bts"></span></div>
   </div>
   <div id="boot-log"></div>
@@ -475,7 +475,7 @@
       <span class="gt" data-t="CLAUDE WORK LAB">CLAUDE WORK LAB</span>
       <span class="night" id="hero-night">夜の部</span>
     </h1>
-    <div class="hero-dt">2026.06.10 ｜ 17:30 START</div>
+    <div class="hero-dt">2026.06.10 | 17:30 START</div>
     <button id="part-btn">
       <span class="btn-fill"></span>
       <span id="part-txt">▶ 長押しで参加表明 / HOLD 3s</span>
@@ -494,8 +494,8 @@
       <div class="row">
         <div class="lbl">VENUE</div>
         <div class="val">
-          <strong>土佐郷土料理 わら焼き<br>龍馬商店 新橋駅前店</strong>
-          東京都港区新橋２丁目１６−１<br>ニュー新橋ビル 3F
+          <strong>わら焼き 龍馬商店<br>新橋駅前店</strong>
+          東京都港区新橋2-16-1<br>ニュー新橋ビル 3F
         </div>
       </div>
       <div class="row">
@@ -510,15 +510,15 @@
   <section>
     <div class="sl">RESTAURANT</div>
     <img class="img-f" src="image/shop.png" alt="龍馬商店 新橋店">
-    <div class="cap">▲ わら焼き 龍馬商店 — ニュー新橋ビル 3F</div>
+    <div class="cap">■ わら焼き 龍馬商店 - ニュー新橋ビル 3F</div>
   </section>
 
   <div class="div"></div>
 
   <section>
     <div class="sl">FEATURED DISH</div>
-    <img class="img-f" src="image/katsuo.jpg" alt="カツオのタタキ">
-    <div class="cap">▲ 土佐名物 わら焼きカツオのタタキ</div>
+    <img class="img-f" src="image/katsuo.jpg" alt="カツオのたたき">
+    <div class="cap">■ 土佐名物 わら焼きカツオのたたき</div>
   </section>
 
   <div class="div"></div>
@@ -527,8 +527,8 @@
     <div class="sl">ACCESS</div>
     <a class="mbtn-a" href="https://maps.google.com/?q=東京都港区新橋2-16-1+ニュー新橋ビル" target="_blank" rel="noopener">▶ GOOGLE MAPS で開く</a>
     <div class="ig">
-      <div><img class="img-f" src="image/map.png" alt="周辺マップ"><div class="cap">▲ 周辺アクセスマップ</div></div>
-      <div><img class="img-f" src="image/floormap.png" alt="3Fフロア"><div class="cap">▲ ニュー新橋ビル 3F フロアマップ</div></div>
+      <div><img class="img-f" src="image/map.png" alt="周辺マップ"><div class="cap">■ 周辺アクセスマップ</div></div>
+      <div><img class="img-f" src="image/floormap.png" alt="3Fフロア"><div class="cap">■ ニュー新橋ビル 3F フロアマップ</div></div>
     </div>
   </section>
 
@@ -538,7 +538,7 @@
     <div class="sl">SHARE THIS PAGE</div>
     <div class="qr">
       <img src="image/qr.png" alt="QRコード">
-      <div class="cap">▲ QRコード — 配布・印刷用</div>
+      <div class="cap">■ QRコード - 配布・印刷用</div>
     </div>
   </section>
 
@@ -565,7 +565,7 @@
   <div class="div"></div>
 
   <section>
-    <div class="sl">SYSTEM LOG — LIVE FEED</div>
+    <div class="sl">SYSTEM LOG - LIVE FEED</div>
     <div id="term"></div>
     <div id="term-row">
       <span>cwl@night:~$&nbsp;</span>
@@ -682,8 +682,8 @@ async function initBattery() {
       if (bat.charging)  { msg = '⚡ CHARGING'; col = 'var(--g)'; }
       else if (pct >= 80){ msg = '作戦行動に十分なエネルギー'; col = 'var(--g)'; }
       else if (pct >= 50){ msg = '作戦継続可能'; col = 'var(--g)'; }
-      else if (pct >= 20){ msg = '要注意 — 充電を検討'; col = '#ff8800'; }
-      else               { msg = '警告: アルコール補給で急速充電が必要'; col = '#f00'; }
+      else if (pct >= 20){ msg = '要注意 - 充電を検討'; col = '#ff8800'; }
+      else               { msg = '警告: 急速充電が必要'; col = '#f00'; }
       bar.innerHTML = `<span style="color:${col}">[ POWER_CELL: ${pct}% ] ${msg}</span>`;
     }
     upd();
@@ -846,7 +846,7 @@ function initFakeCamera() {
     if ($('fd-drunk'))   $('fd-drunk').textContent   = pct + '%';
     if ($('fd-emotion')) $('fd-emotion').textContent = EMOTIONS[0|Math.random()*EMOTIONS.length];
     if ($('fd-threat'))  $('fd-threat').textContent  = THREATS[0|Math.random()*THREATS.length];
-    if ($('fd-target'))  $('fd-target').textContent  = pct>70 ? '泥酔者' : pct>40 ? 'ほろ酔い' : '素面';
+    if ($('fd-target'))  $('fd-target').textContent  = pct>70 ? '泥酔モード' : pct>40 ? 'ほろ酔い' : '素面';
     if ($('cam-status')) $('cam-status').textContent = CSTATUS[0|Math.random()*CSTATUS.length];
     setTimeout(updateData, 1500 + Math.random()*1500);
   })();

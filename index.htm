@@ -2,475 +2,450 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <title>Claude Work Lab 夜の部 | 2026.06.10</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --c:   #00e5ff;
-      --g:   #00ffcc;
-      --m:   #ff2d7a;
-      --b:   #2979ff;
-      --bg:  #050510;
-      --tx:  #cce8f0;
-      --hud: 52px;   /* HUD top bar height */
+    :root{
+      --c:#00e5ff; --g:#00ffcc; --m:#ff2d7a; --b:#2979ff;
+      --bg:#050510; --tx:#cce8f0; --hud:68px;
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--tx);
-      font-family: 'Meiryo', 'Yu Gothic', sans-serif;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--bg); color:var(--tx);
+      font-family:'Meiryo','Yu Gothic',sans-serif;
+      overflow-x:hidden; -webkit-font-smoothing:antialiased;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none; -webkit-user-select:none;
     }
-
-    /* ── Grid overlay ── */
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    body::before{
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image:
-        linear-gradient(rgba(0,229,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,.035) 1px, transparent 1px);
-      background-size: 36px 36px;
+        linear-gradient(rgba(0,229,255,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,229,255,.035) 1px,transparent 1px);
+      background-size:36px 36px;
     }
-    /* ── Scanlines ── */
-    body::after {
-      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,.16) 2px, rgba(0,0,0,.16) 4px);
+    body::after{
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:repeating-linear-gradient(
+        0deg,transparent,transparent 2px,rgba(0,0,0,.16) 2px,rgba(0,0,0,.16) 4px);
     }
+    @keyframes blink{50%{opacity:0}}
 
-    /* ── CRT sweep ── */
-    #crt {
-      position: fixed; left: 0; right: 0; height: 2px; z-index: 1; pointer-events: none;
-      background: linear-gradient(90deg, transparent, rgba(0,229,255,.06), transparent);
-      animation: sweep 12s linear infinite;
+    /* ── OVERLOAD ── */
+    body.overload{
+      --c:#ff2200;--g:#ff4400;--m:#ff0000;--b:#ff0000;--tx:#ff9999;
+      animation:flk .07s step-end infinite;
     }
-    @keyframes sweep { from { top: -2px; } to { top: 100vh; } }
-
-    @keyframes blink { 50% { opacity: 0; } }
-
-    /* ══════════════════════════════════════
-       OVERLOAD MODE
-    ══════════════════════════════════════ */
-    body.overload {
-      --c: #ff2200; --g: #ff4400; --m: #ff0000; --b: #ff0000; --tx: #ff9999;
-      animation: flk .07s step-end infinite;
-    }
-    @keyframes flk { 0%,100%{background-color:#050510} 50%{background-color:#140000} }
-    body.overload::before {
+    @keyframes flk{0%,100%{background-color:#050510}50%{background-color:#150000}}
+    body.overload::before{
       background-image:
-        linear-gradient(rgba(255,0,0,.09) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,0,0,.09) 1px, transparent 1px);
-      background-size: 20px 20px;
+        linear-gradient(rgba(255,0,0,.09) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,0,0,.09) 1px,transparent 1px);
+      background-size:20px 20px;
     }
-    body.overload::after {
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 1px,
-        rgba(255,0,0,.2) 1px, rgba(255,0,0,.2) 3px);
+    body.overload::after{
+      background:repeating-linear-gradient(
+        0deg,transparent,transparent 1px,rgba(255,0,0,.2) 1px,rgba(255,0,0,.2) 3px);
     }
-    #overload-banner { display: none; }
-    body.overload #overload-banner { display: flex; }
+    #overload-banner{display:none}
+    body.overload #overload-banner{display:flex}
 
-    /* ══════════════════════════════════════
-       HUD  — fixed top bar (full width)
-    ══════════════════════════════════════ */
-    #hud {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      height: var(--hud);
-      display: grid; grid-template-columns: 1fr 20px 1fr;
-      align-items: center;
-      background: rgba(2, 3, 18, .96);
-      border-bottom: 1px solid rgba(0,255,204,.28);
-      box-shadow: 0 2px 20px rgba(0,255,204,.08);
-      padding: 0 .9rem;
+    /* ══ ORIENTATION LOCK ══ */
+    #orient-lock{
+      position:fixed; inset:0; z-index:10000;
+      background:#000;
+      display:none; flex-direction:column;
+      justify-content:center; align-items:center;
+      gap:1.4rem; padding:2rem;
+      animation:ol-flash 1s step-end infinite;
     }
-    .hud-cell { display: flex; flex-direction: column; gap: .08rem; }
-    .hud-cell.right { text-align: right; align-items: flex-end; }
-    .hud-lbl {
-      font-family: 'Orbitron', monospace; font-size: .44rem;
-      letter-spacing: .3em; color: rgba(0,255,204,.45);
+    @keyframes ol-flash{
+      0%,100%{box-shadow:inset 0 0 0 3px #f00,0 0 30px rgba(255,0,0,.25)}
+      50%{box-shadow:inset 0 0 0 3px transparent}
     }
-    #hud-t, #hud-cd {
-      font-family: 'Courier New', monospace;
-      font-size: .78rem; letter-spacing: .05em;
-      color: var(--g); text-shadow: 0 0 7px var(--g);
+    .ol-err{
+      font-family:'Orbitron',monospace; font-size:clamp(1.1rem,6vw,1.6rem);
+      color:#f00; text-shadow:0 0 20px #f00; letter-spacing:.15em; text-align:center;
     }
-    #hud-cd.mission { color: var(--m); text-shadow: 0 0 7px var(--m); }
-    #hud-dot { color: var(--g); font-size: .55rem; animation: blink .7s step-end infinite; text-align: center; }
+    .ol-code{font-family:'Courier New',monospace; font-size:.7rem; color:rgba(255,0,0,.6); letter-spacing:.2em; text-align:center}
+    .ol-msg{font-family:'Courier New',monospace; font-size:.88rem; color:#ccc; text-align:center; line-height:2}
+    .ol-phone{
+      width:28px; height:50px;
+      border:3px solid #f00; border-radius:5px;
+      position:relative; box-shadow:0 0 15px rgba(255,0,0,.5);
+      animation:phone-rot 2.5s ease-in-out infinite;
+    }
+    .ol-phone::before{
+      content:''; position:absolute;
+      top:5px; left:50%; transform:translateX(-50%);
+      width:10px; height:2px; background:#f00; border-radius:1px;
+    }
+    .ol-phone::after{content:''; position:absolute; inset:7px 3px; background:rgba(255,0,0,.2)}
+    @keyframes phone-rot{0%,35%{transform:rotate(0)}65%,100%{transform:rotate(-90deg)}}
+    .ol-hint{
+      font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:.3em;
+      color:#f00; text-shadow:0 0 8px #f00;
+      animation:blink .6s step-end infinite;
+    }
+    .ol-bar-track{width:200px; height:3px; background:rgba(255,0,0,.2)}
+    .ol-bar-fill{height:100%; background:#f00; box-shadow:0 0 8px #f00; animation:ol-scan 2s linear infinite}
+    @keyframes ol-scan{0%{width:0%}100%{width:100%}}
 
-    /* Overload banner — below HUD */
-    #overload-banner {
-      position: fixed; top: var(--hud); left: 0; right: 0; z-index: 999;
-      background: rgba(255,0,0,.18); border-bottom: 2px solid #f00;
-      justify-content: center; align-items: center;
-      padding: .4rem; gap: .5rem;
-      font-family: 'Orbitron', monospace; font-size: .65rem;
-      color: #f00; letter-spacing: .3em; text-shadow: 0 0 10px #f00;
-      animation: blink .35s step-end infinite;
+    /* ══ CRT ══ */
+    #crt{
+      position:fixed; left:0; right:0; height:2px; z-index:1; pointer-events:none;
+      background:linear-gradient(90deg,transparent,rgba(0,229,255,.06),transparent);
+      animation:sweep 12s linear infinite;
     }
+    @keyframes sweep{from{top:-2px}to{top:100vh}}
 
-    /* MUSIC BTN */
-    #mbtn {
-      position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 1000;
-      font-family: 'Orbitron', monospace; font-size: .65rem; letter-spacing: .15em;
-      color: var(--c); background: rgba(0,229,255,.06);
-      border: 1px solid var(--c); padding: .65rem 1.1rem;
-      cursor: pointer; transition: box-shadow .3s;
-      box-shadow: 0 0 10px rgba(0,229,255,.2);
-      min-height: 44px; display: flex; align-items: center;
-    }
-    #mbtn.on { border-color: var(--g); color: var(--g); box-shadow: 0 0 10px rgba(0,255,204,.3); }
-
-    /* ══════════════════════════════════════
-       BOOT OVERLAY
-    ══════════════════════════════════════ */
-    #boot {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #000;
-      display: flex; flex-direction: column;
-      padding: clamp(1.2rem, 5vw, 3rem);
-      transition: opacity .8s ease; overflow: hidden;
-    }
-    #boot-hdr {
-      font-family: 'Courier New', monospace; font-size: .78rem;
-      color: var(--g); text-shadow: 0 0 8px var(--g);
-      border-bottom: 1px solid rgba(0,255,204,.2);
-      padding-bottom: .8rem; margin-bottom: 1.2rem;
-    }
-    #boot-hdr .t { font-size: .92rem; letter-spacing: .2em; margin-bottom: .3rem; }
-    #boot-log {
-      font-family: 'Courier New', monospace; font-size: .82rem;
-      line-height: 2; flex: 1;
-    }
-    .bl     { color: #888; word-break: break-all; }
-    .bl .ok { color: var(--g); }
-    #boot-cur { font-family: 'Courier New', monospace; font-size: .82rem; color: var(--g); animation: blink .7s step-end infinite; }
-    #boot-enter { margin-top: 2rem; display: none; text-align: center; }
-    #boot-enter button {
-      font-family: 'Orbitron', monospace; font-size: 1rem; letter-spacing: .3em; color: var(--g);
-      background: transparent; border: 1px solid var(--g);
-      padding: 1rem 3rem; cursor: pointer; width: 100%; max-width: 320px;
-      text-shadow: 0 0 10px var(--g); min-height: 56px;
-      animation: pulse-e 1.4s ease-in-out infinite;
-    }
-    @keyframes pulse-e {
-      0%,100% { box-shadow: 0 0 20px rgba(0,255,204,.3), inset 0 0 20px rgba(0,255,204,.05); }
-      50%      { box-shadow: 0 0 40px rgba(0,255,204,.55), inset 0 0 20px rgba(0,255,204,.1); }
+    /* ══ OVERLOAD BANNER ══ */
+    #overload-banner{
+      position:fixed; top:var(--hud); left:0; right:0; z-index:999;
+      background:rgba(255,0,0,.18); border-bottom:2px solid #f00;
+      justify-content:center; align-items:center;
+      padding:.4rem; font-family:'Orbitron',monospace; font-size:.65rem;
+      color:#f00; letter-spacing:.3em; text-shadow:0 0 10px #f00;
+      animation:blink .35s step-end infinite;
     }
 
-    /* ══════════════════════════════════════
-       BIO-AUTH OVERLAY
-    ══════════════════════════════════════ */
-    #bio-ov {
-      position: fixed; inset: 0; z-index: 8000;
-      background: rgba(0,0,0,.94);
-      display: none; justify-content: center; align-items: center;
-      padding: 1rem;
+    /* ══ HUD ══ */
+    #hud{
+      position:fixed; top:0; left:0; right:0; z-index:1000;
+      background:rgba(2,3,18,.97);
+      border-bottom:1px solid rgba(0,255,204,.28);
+      box-shadow:0 2px 20px rgba(0,255,204,.08);
+      padding:.35rem .9rem .28rem;
     }
-    #bio-ov.show { display: flex; }
-    .bio-box {
-      width: 100%; max-width: 420px;
-      border: 1px solid var(--g);
-      padding: 2rem 1.5rem;
-      box-shadow: 0 0 50px rgba(0,255,204,.2);
-      text-align: center; font-family: 'Courier New', monospace;
+    .hud-main{
+      display:grid; grid-template-columns:1fr 18px 1fr;
+      align-items:center; margin-bottom:.18rem;
     }
-    .bio-title {
-      font-family: 'Orbitron', monospace; font-size: .82rem;
-      letter-spacing: .25em; color: var(--g); text-shadow: 0 0 10px var(--g);
-      margin-bottom: 1.8rem;
-    }
-    .bio-ring-wrap { margin: 0 auto 1.5rem; width: 90px; height: 90px; }
-    .bio-ring {
-      width: 100%; height: 100%;
-      border: 2px solid var(--g); border-radius: 50%;
-      animation: spin 2s linear infinite; position: relative;
-    }
-    .bio-ring::before {
-      content: ''; position: absolute; inset: 6px;
-      border: 1px solid rgba(0,255,204,.3); border-radius: 50%;
-      animation: spin 1.4s linear infinite reverse;
-    }
-    .bio-ring::after {
-      content: '⊕'; position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem; color: var(--g); text-shadow: 0 0 10px var(--g);
-      animation: spin 2s linear infinite reverse;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .bio-prog { height: 4px; background: rgba(0,255,204,.12); margin: 0 0 1rem; overflow: hidden; }
-    #bio-bar  { height: 100%; width: 0; background: var(--g); box-shadow: 0 0 10px var(--g); }
-    #bio-status {
-      font-size: .82rem; letter-spacing: .12em;
-      color: var(--g); text-shadow: 0 0 8px var(--g);
-      min-height: 1.8rem; animation: blink 1s step-end infinite;
-    }
-    #bio-secret {
-      display: none; margin-top: 1.8rem;
-      border-top: 1px solid rgba(0,255,204,.2); padding-top: 1.5rem;
-    }
-    #bio-secret .ok-msg {
-      font-family: 'Orbitron', monospace; font-size: .75rem;
-      color: var(--g); text-shadow: 0 0 10px var(--g);
-      letter-spacing: .15em; margin-bottom: 1.2rem;
-    }
-    #bio-secret .secret-info { font-size: .88rem; line-height: 2.1; color: #ccc; }
-    .bio-close-hint { font-size: .65rem; opacity: .4; margin-top: 1rem; }
-
-    /* ══════════════════════════════════════
-       MAIN APP
-    ══════════════════════════════════════ */
-    #app {
-      position: relative; z-index: 1;
-      opacity: 0; transition: opacity .9s ease;
-      padding-top: var(--hud);
+    .hud-cell{display:flex; flex-direction:column; gap:.04rem}
+    .hud-cell.r{text-align:right; align-items:flex-end}
+    .hud-lbl{font-family:'Orbitron',monospace; font-size:.4rem; letter-spacing:.3em; color:rgba(0,255,204,.4)}
+    #hud-t,#hud-cd{font-family:'Courier New',monospace; font-size:.78rem; letter-spacing:.05em; color:var(--g); text-shadow:0 0 7px var(--g)}
+    #hud-dot{color:var(--g); font-size:.5rem; animation:blink .7s step-end infinite; text-align:center}
+    #hud-cd.mission{color:var(--m); text-shadow:0 0 7px var(--m)}
+    #bat-bar{
+      font-family:'Courier New',monospace; font-size:.56rem; color:var(--g);
+      text-align:center; border-top:1px solid rgba(0,255,204,.12);
+      padding-top:.2rem; margin-top:.08rem; letter-spacing:.05em;
     }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: calc(100vh - var(--hud));
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      text-align: center;
-      padding: 3rem 1.5rem 2.5rem;
-      position: relative;
+    /* ══ MUSIC BTN ══ */
+    #mbtn{
+      position:fixed; bottom:1.2rem; right:1.2rem; z-index:1000;
+      font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:.15em;
+      color:var(--c); background:rgba(0,229,255,.06);
+      border:1px solid var(--c); padding:.65rem 1rem;
+      box-shadow:0 0 10px rgba(0,229,255,.2);
+      min-height:48px; display:flex; align-items:center;
+    }
+    #mbtn.on{border-color:var(--g); color:var(--g); box-shadow:0 0 10px rgba(0,255,204,.3)}
+
+    /* ══ BOOT ══ */
+    #boot{
+      position:fixed; inset:0; z-index:9999; background:#000;
+      display:flex; flex-direction:column;
+      padding:clamp(1.2rem,5vw,3rem);
+      transition:opacity .8s ease; overflow:hidden;
+    }
+    #boot-hdr{
+      font-family:'Courier New',monospace; font-size:.78rem;
+      color:var(--g); text-shadow:0 0 8px var(--g);
+      border-bottom:1px solid rgba(0,255,204,.2);
+      padding-bottom:.8rem; margin-bottom:1.2rem;
+    }
+    #boot-hdr .t{font-size:.9rem; letter-spacing:.2em; margin-bottom:.3rem}
+    #boot-log{font-family:'Courier New',monospace; font-size:.82rem; line-height:2; flex:1}
+    .bl{color:#888; word-break:break-all}
+    .bl .ok{color:var(--g)}
+    #boot-cur{font-family:'Courier New',monospace; font-size:.82rem; color:var(--g); animation:blink .7s step-end infinite}
+    #boot-enter{margin-top:2rem; display:none; text-align:center}
+    #boot-enter button{
+      font-family:'Orbitron',monospace; font-size:1rem; letter-spacing:.3em; color:var(--g);
+      background:transparent; border:1px solid var(--g);
+      padding:1rem 3rem; width:100%; max-width:320px; min-height:56px;
+      text-shadow:0 0 10px var(--g); animation:pulse-e 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse-e{
+      0%,100%{box-shadow:0 0 20px rgba(0,255,204,.3),inset 0 0 20px rgba(0,255,204,.05)}
+      50%{box-shadow:0 0 40px rgba(0,255,204,.55),inset 0 0 20px rgba(0,255,204,.1)}
     }
 
-    /* corner brackets */
-    .co { position: absolute; width: 44px; height: 44px; }
-    .co.tl { top:.8rem; left:.8rem;  border-top:2px solid var(--c); border-left:2px solid var(--c);  box-shadow:-2px -2px 10px var(--c); }
-    .co.tr { top:.8rem; right:.8rem; border-top:2px solid var(--c); border-right:2px solid var(--c); box-shadow: 2px -2px 10px var(--c); }
-    .co.bl { bottom:.8rem; left:.8rem;  border-bottom:2px solid var(--c); border-left:2px solid var(--c);  box-shadow:-2px 2px 10px var(--c); }
-    .co.br { bottom:.8rem; right:.8rem; border-bottom:2px solid var(--c); border-right:2px solid var(--c); box-shadow: 2px 2px 10px var(--c); }
+    /* ══ SCAN LOG (long press popup) ══ */
+    #scan-log{
+      position:fixed; bottom:0; left:0; right:0; z-index:5000;
+      background:rgba(0,3,12,.97); border-top:2px solid var(--g);
+      padding:.9rem 1.1rem .85rem; display:none;
+    }
+    #scan-hdr{
+      font-family:'Orbitron',monospace; font-size:.68rem; letter-spacing:.22em;
+      color:var(--g); text-shadow:0 0 8px var(--g);
+      margin-bottom:.5rem; animation:blink .5s step-end infinite;
+    }
+    #scan-txt{color:#0f8; font-family:'Courier New',monospace; font-size:.82rem; min-height:1.3rem; margin-bottom:.7rem}
+    .scan-track{height:4px; background:rgba(0,255,204,.15); overflow:hidden; margin-bottom:.4rem}
+    #scan-fill{height:100%; width:0; background:var(--g); box-shadow:0 0 10px var(--g)}
+    #scan-hint{font-family:'Courier New',monospace; font-size:.6rem; color:rgba(0,255,204,.45); text-align:center}
 
-    .badge {
-      font-family: 'Orbitron', monospace; font-size: .62rem; letter-spacing: .4em;
-      color: var(--c); text-shadow: 0 0 10px var(--c);
-      margin-bottom: 1.8rem; animation: blink 2.5s step-end infinite;
+    /* ══ BIO-AUTH OVERLAY ══ */
+    #bio-ov{
+      position:fixed; inset:0; z-index:8000; background:rgba(0,0,0,.94);
+      display:none; justify-content:center; align-items:center; padding:1rem;
     }
+    #bio-ov.show{display:flex}
+    .bio-box{
+      width:100%; max-width:420px; border:1px solid var(--g);
+      padding:2rem 1.5rem; box-shadow:0 0 50px rgba(0,255,204,.2);
+      text-align:center; font-family:'Courier New',monospace;
+    }
+    .bio-title{font-family:'Orbitron',monospace; font-size:.82rem; letter-spacing:.25em; color:var(--g); text-shadow:0 0 10px var(--g); margin-bottom:1.8rem}
+    .bio-ring-wrap{margin:0 auto 1.5rem; width:90px; height:90px}
+    .bio-ring{width:100%; height:100%; border:2px solid var(--g); border-radius:50%; animation:spin 2s linear infinite; position:relative}
+    .bio-ring::before{content:''; position:absolute; inset:6px; border:1px solid rgba(0,255,204,.3); border-radius:50%; animation:spin 1.4s linear infinite reverse}
+    .bio-ring::after{content:'⊕'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:var(--g); text-shadow:0 0 10px var(--g); animation:spin 2s linear infinite reverse}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .bio-prog{height:4px; background:rgba(0,255,204,.12); margin:0 0 1rem; overflow:hidden}
+    #bio-bar{height:100%; width:0; background:var(--g); box-shadow:0 0 10px var(--g)}
+    #bio-status{font-size:.82rem; letter-spacing:.12em; color:var(--g); text-shadow:0 0 8px var(--g); min-height:1.8rem; animation:blink 1s step-end infinite}
+    #bio-secret{display:none; margin-top:1.8rem; border-top:1px solid rgba(0,255,204,.2); padding-top:1.5rem}
+    #bio-secret .ok-msg{font-family:'Orbitron',monospace; font-size:.75rem; color:var(--g); text-shadow:0 0 10px var(--g); letter-spacing:.15em; margin-bottom:1.2rem}
+    #bio-secret .secret-info{font-size:.88rem; line-height:2.1; color:#ccc}
+    .bio-close-hint{font-size:.65rem; opacity:.4; margin-top:1rem}
 
-    .hero h1 {
-      font-family: 'Orbitron', monospace; font-weight: 900;
-      font-size: clamp(1.55rem, 8.5vw, 3rem);
-      color: #fff; letter-spacing: .05em; line-height: 1.15;
-      animation: glow-title 3s ease-in-out infinite;
+    /* ══ CRASH OVERLAY ══ */
+    #crash-ov{
+      position:fixed; inset:0; z-index:9998;
+      display:none; justify-content:center; align-items:center;
+      transition:opacity .6s;
     }
-    .hero h1 .night {
-      display: block;
-      font-size: clamp(3.6rem, 17vw, 6rem);
-      color: var(--c); letter-spacing: .04em;
-      line-height: 1.1; margin-top: .15rem;
-    }
-    @keyframes glow-title {
-      0%,100% { text-shadow: 0 0 12px var(--c),0 0 28px var(--c),0 0 55px var(--b); }
-      50%      { text-shadow: 0 0 22px var(--c),0 0 55px var(--c),0 0 110px var(--b); }
-    }
-
-    /* Glitch */
-    .gt { position: relative; display: inline-block; }
-    .gt::before, .gt::after {
-      content: attr(data-t); position: absolute;
-      left:0; top:0; width:100%; height:100%; opacity:0;
-    }
-    .gt::before { color: var(--m); }
-    .gt::after  { color: var(--g); }
-    .gt.go::before { opacity:1; animation: ga .36s steps(3,end) forwards; }
-    .gt.go::after  { opacity:1; animation: gb .36s steps(3,end) forwards; }
-    @keyframes ga {
-      0%  { clip-path:inset(20% 0 65% 0); transform:translate(-6px,0); }
-      33% { clip-path:inset(70% 0 10% 0); transform:translate(6px,0); }
-      66% { clip-path:inset(40% 0 42% 0); transform:translate(-3px,0); }
-      100%{ clip-path:inset(100% 0 0 0);  transform:translate(0); }
-    }
-    @keyframes gb {
-      0%  { clip-path:inset(60% 0 20% 0); transform:translate(6px,0); }
-      33% { clip-path:inset(10% 0 75% 0); transform:translate(-6px,0); }
-      66% { clip-path:inset(80% 0  5% 0); transform:translate(3px,0); }
-      100%{ clip-path:inset(100% 0 0 0);  transform:translate(0); }
-    }
-
-    .hero-dt {
-      margin-top: 2rem; padding: 1rem 1.5rem;
-      border: 1px solid var(--c);
-      box-shadow: 0 0 20px var(--c), inset 0 0 20px rgba(0,229,255,.05);
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(1rem, 4.5vw, 1.4rem);
-      letter-spacing: .08em; color: var(--c); text-shadow: 0 0 12px var(--c);
-      width: 100%; max-width: 360px;
+    #crash-canvas{position:absolute; inset:0; width:100%; height:100%}
+    #crash-text{
+      position:relative; z-index:1; font-family:'Orbitron',monospace;
+      text-align:center; color:#f00; text-shadow:0 0 20px #f00;
+      font-size:clamp(1rem,5vw,1.4rem); line-height:2; letter-spacing:.2em;
     }
 
-    /* PARTICIPATE BTN */
-    #part-btn {
-      font-family: 'Orbitron', monospace; font-size: .88rem;
-      letter-spacing: .2em; color: #000;
-      background: var(--g); border: none;
-      padding: 1rem 2rem; cursor: pointer; margin-top: 1.8rem;
-      box-shadow: 0 0 30px rgba(0,255,204,.55);
-      transition: box-shadow .3s, transform .15s;
-      width: 100%; max-width: 340px; min-height: 52px;
+    /* ══ MAIN APP ══ */
+    #app{
+      position:relative; z-index:1;
+      opacity:0; transition:opacity .9s ease;
+      padding-top:var(--hud);
+      will-change:transform;
     }
-    #part-btn:active { transform: scale(.98); }
+    .hero{
+      min-height:calc(100vh - var(--hud));
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      text-align:center; padding:3rem 1.5rem 2.5rem; position:relative;
+    }
+    .co{position:absolute; width:40px; height:40px}
+    .co.tl{top:.8rem;left:.8rem; border-top:2px solid var(--c);border-left:2px solid var(--c); box-shadow:-2px -2px 10px var(--c)}
+    .co.tr{top:.8rem;right:.8rem; border-top:2px solid var(--c);border-right:2px solid var(--c); box-shadow:2px -2px 10px var(--c)}
+    .co.bl{bottom:.8rem;left:.8rem; border-bottom:2px solid var(--c);border-left:2px solid var(--c); box-shadow:-2px 2px 10px var(--c)}
+    .co.br{bottom:.8rem;right:.8rem; border-bottom:2px solid var(--c);border-right:2px solid var(--c); box-shadow:2px 2px 10px var(--c)}
+    .badge{font-family:'Orbitron',monospace; font-size:.62rem; letter-spacing:.4em; color:var(--c); text-shadow:0 0 10px var(--c); margin-bottom:1.8rem; animation:blink 2.5s step-end infinite}
+    .hero h1{font-family:'Orbitron',monospace; font-weight:900; font-size:clamp(1.55rem,8.5vw,3rem); color:#fff; letter-spacing:.05em; line-height:1.15; animation:glow-title 3s ease-in-out infinite}
+    .hero h1 .night{display:block; font-size:clamp(3.6rem,17vw,6rem); color:var(--c); letter-spacing:.04em; line-height:1.1; margin-top:.15rem}
+    @keyframes glow-title{
+      0%,100%{text-shadow:0 0 12px var(--c),0 0 28px var(--c),0 0 55px var(--b)}
+      50%{text-shadow:0 0 22px var(--c),0 0 55px var(--c),0 0 110px var(--b)}
+    }
+    .gt{position:relative; display:inline-block}
+    .gt::before,.gt::after{content:attr(data-t); position:absolute; left:0;top:0; width:100%;height:100%; opacity:0}
+    .gt::before{color:var(--m)} .gt::after{color:var(--g)}
+    .gt.go::before{opacity:1; animation:ga .36s steps(3,end) forwards}
+    .gt.go::after {opacity:1; animation:gb .36s steps(3,end) forwards}
+    @keyframes ga{0%{clip-path:inset(20% 0 65% 0);transform:translate(-6px,0)}33%{clip-path:inset(70% 0 10% 0);transform:translate(6px,0)}66%{clip-path:inset(40% 0 42% 0);transform:translate(-3px,0)}100%{clip-path:inset(100% 0 0 0);transform:translate(0)}}
+    @keyframes gb{0%{clip-path:inset(60% 0 20% 0);transform:translate(6px,0)}33%{clip-path:inset(10% 0 75% 0);transform:translate(-6px,0)}66%{clip-path:inset(80% 0 5% 0);transform:translate(3px,0)}100%{clip-path:inset(100% 0 0 0);transform:translate(0)}}
+    .hero-dt{
+      margin-top:2rem; padding:.95rem 1.4rem;
+      border:1px solid var(--c);
+      box-shadow:0 0 20px var(--c),inset 0 0 20px rgba(0,229,255,.05);
+      font-family:'Orbitron',monospace; font-size:clamp(1rem,4.5vw,1.35rem);
+      letter-spacing:.08em; color:var(--c); text-shadow:0 0 12px var(--c);
+      width:100%; max-width:360px;
+    }
+    /* LONG PRESS BUTTON */
+    #part-btn{
+      font-family:'Orbitron',monospace; font-size:.82rem; letter-spacing:.18em; color:#000;
+      background:var(--g); border:none; padding:0;
+      margin-top:1.8rem; width:100%; max-width:340px; min-height:56px;
+      box-shadow:0 0 30px rgba(0,255,204,.55);
+      transition:box-shadow .3s; position:relative; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #part-btn:active{box-shadow:0 0 50px rgba(0,255,204,.9)}
+    .btn-fill{
+      position:absolute; top:0; left:0; height:100%; width:0;
+      background:rgba(0,0,0,.35); pointer-events:none;
+    }
+    #part-btn.pressing .btn-fill{width:100%; transition:width 3s linear}
+    #part-txt{position:relative; z-index:1; padding:.95rem 1.5rem; white-space:nowrap}
 
-    /* ── Divider ── */
-    .div {
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--c), transparent);
-      margin: 0 1rem; opacity: .3;
+    /* Divider */
+    .div{height:1px; background:linear-gradient(to right,transparent,var(--c),transparent); margin:0 1rem; opacity:.3}
+    section{max-width:640px; margin:0 auto; padding:2rem 1.1rem}
+    .sl{font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:.4em; color:var(--m); text-shadow:0 0 8px var(--m); margin-bottom:1.2rem}
+    .sl::before{content:'// '}
+    .card{border:1px solid var(--c); padding:1.5rem; box-shadow:0 0 24px rgba(0,229,255,.12),inset 0 0 24px rgba(0,229,255,.03); position:relative}
+    .card::before{content:''; position:absolute; top:-1px; left:20px; width:36px; height:2px; background:var(--bg)}
+    .row{display:grid; grid-template-columns:4.5rem 1fr; gap:.7rem 1.2rem; margin-bottom:1.3rem; align-items:start}
+    .row:last-child{margin-bottom:0}
+    .lbl{font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:.18em; color:var(--m); text-shadow:0 0 8px var(--m); padding-top:.3rem}
+    .val{color:#fff; line-height:1.9; font-size:1rem}
+    .val strong{display:block; font-size:1.1rem; color:var(--c); text-shadow:0 0 8px var(--c); margin-bottom:.1rem; line-height:1.45}
+    .img-f{width:100%; display:block; border:1px solid rgba(0,229,255,.28); box-shadow:0 0 20px rgba(0,229,255,.1); filter:saturate(1.15) contrast(1.05)}
+    .cap{font-family:'Orbitron',monospace; font-size:.54rem; letter-spacing:.18em; color:var(--c); opacity:.6; text-align:center; margin-top:.5rem}
+    .ig{display:flex; flex-direction:column; gap:1.2rem}
+    .mbtn-a{
+      display:flex; align-items:center; justify-content:center; gap:.5rem;
+      color:var(--c); text-decoration:none; font-family:'Orbitron',monospace;
+      font-size:.72rem; letter-spacing:.2em; border:1px solid var(--c);
+      padding:.9rem 1.2rem; box-shadow:0 0 12px rgba(0,229,255,.22);
+      margin-bottom:1.2rem; min-height:52px;
     }
+    .qr{display:flex; flex-direction:column; align-items:center; gap:.8rem}
+    .qr img{width:220px; height:220px; border:2px solid var(--c); box-shadow:0 0 28px var(--c); padding:12px; background:#fff}
 
-    /* ── Sections ── */
-    section { max-width: 640px; margin: 0 auto; padding: 2rem 1.1rem; }
-    .sl {
-      font-family: 'Orbitron', monospace; font-size: .62rem; letter-spacing: .4em;
-      color: var(--m); text-shadow: 0 0 8px var(--m); margin-bottom: 1.2rem;
+    /* ══ TERMINAL ══ */
+    #term{
+      background:#000; border:1px solid rgba(0,229,255,.25);
+      box-shadow:0 0 20px rgba(0,229,255,.08);
+      padding:.9rem 1rem; height:260px; overflow-y:auto; scroll-behavior:smooth;
+      font-family:'Courier New',monospace; font-size:.82rem; line-height:1.85; color:#00cc88;
     }
-    .sl::before { content: '// '; }
+    #term::-webkit-scrollbar{width:3px} #term::-webkit-scrollbar-thumb{background:var(--c)}
+    .tl-line{word-break:break-all}
+    .tl-ts{color:#444} .tl-al{color:var(--m)} .tl-ok{color:var(--g)} .tl-info{color:#00aaff} .tl-cmd{color:#fff}
+    #term-row{
+      display:flex; align-items:center; gap:.5rem;
+      background:#000; border:1px solid rgba(0,229,255,.25); border-top:none;
+      padding:.6rem 1rem; font-family:'Courier New',monospace; font-size:.82rem;
+    }
+    #term-row span{color:var(--g); white-space:nowrap; font-size:.78rem}
+    #term-input{flex:1; background:transparent; border:none; outline:none; color:#00cc88; font-family:'Courier New',monospace; font-size:.82rem; caret-color:var(--g); min-height:36px; user-select:text; -webkit-user-select:text}
 
-    /* ── Info card ── */
-    .card {
-      border: 1px solid var(--c); padding: 1.5rem;
-      box-shadow: 0 0 24px rgba(0,229,255,.12), inset 0 0 24px rgba(0,229,255,.03);
-      position: relative;
+    /* ══ FAKE CAMERA ══ */
+    #cam-view{
+      width:100%; height:240px; background:#000;
+      border:1px solid rgba(0,255,100,.35);
+      box-shadow:0 0 20px rgba(0,255,100,.1);
+      position:relative; overflow:hidden;
     }
-    .card::before { content: ''; position: absolute; top: -1px; left: 20px; width: 36px; height: 2px; background: var(--bg); }
+    #cam-view::before{
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+      background:repeating-linear-gradient(0deg,rgba(0,20,10,.25),rgba(0,20,10,.25) 2px,transparent 2px,transparent 4px);
+    }
+    #cam-view::after{
+      content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+      background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.55) 100%);
+    }
+    #cam-line{
+      position:absolute; left:0; right:0; height:2px; z-index:3; pointer-events:none;
+      background:linear-gradient(90deg,transparent,rgba(0,255,100,.45),transparent);
+      animation:camscan 3.5s linear infinite;
+    }
+    @keyframes camscan{0%{top:0}100%{top:100%}}
+    .cam-co{position:absolute; width:20px; height:20px; z-index:3; animation:co-pulse 2s ease-in-out infinite}
+    .cam-co.tl{top:8px;left:8px; border-top:2px solid #0f0;border-left:2px solid #0f0}
+    .cam-co.tr{top:8px;right:8px; border-top:2px solid #0f0;border-right:2px solid #0f0}
+    .cam-co.bl{bottom:8px;left:8px; border-bottom:2px solid #0f0;border-left:2px solid #0f0}
+    .cam-co.br{bottom:8px;right:8px; border-bottom:2px solid #0f0;border-right:2px solid #0f0}
+    @keyframes co-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    #face-target{
+      position:absolute; z-index:4; width:65px; height:65px;
+      border:1px solid rgba(0,255,100,.75); box-shadow:0 0 12px rgba(0,255,100,.3);
+      transform:translate(-50%,-50%); pointer-events:none; will-change:left,top;
+      transition:border-color .3s;
+    }
+    .ft-h{position:absolute;left:-8px;right:-8px;top:50%;height:1px;background:#0f0;transform:translateY(-50%)}
+    .ft-v{position:absolute;top:-8px;bottom:-8px;left:50%;width:1px;background:#0f0;transform:translateX(-50%)}
+    #cam-status{
+      position:absolute; bottom:8px; left:0; right:0; z-index:5;
+      font-family:'Courier New',monospace; font-size:.62rem; color:#0f0;
+      text-shadow:0 0 6px #0f0; text-align:center;
+      animation:blink 1.5s step-end infinite; letter-spacing:.12em;
+    }
+    #face-data{
+      display:grid; grid-template-columns:1fr 1fr; gap:.5rem;
+      margin-top:.8rem; border:1px solid rgba(0,255,100,.2); padding:.7rem .9rem;
+      font-family:'Courier New',monospace; font-size:.8rem;
+    }
+    .fd-row{display:flex; flex-direction:column; gap:.08rem}
+    .fd-lbl{font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:.25em; color:rgba(0,255,100,.45)}
+    .fd-val{color:#0f0; text-shadow:0 0 6px rgba(0,255,100,.6)}
 
-    .row { display: grid; grid-template-columns: 4.5rem 1fr; gap: .7rem 1.2rem; margin-bottom: 1.3rem; align-items: start; }
-    .row:last-child { margin-bottom: 0; }
-    .lbl { font-family: 'Orbitron', monospace; font-size: .6rem; letter-spacing: .18em; color: var(--m); text-shadow: 0 0 8px var(--m); padding-top: .3rem; }
-    .val { color: #fff; line-height: 1.9; font-size: 1rem; }
-    .val strong { display: block; font-size: 1.1rem; color: var(--c); text-shadow: 0 0 8px var(--c); margin-bottom: .1rem; line-height: 1.45; }
-
-    /* ── Images ── */
-    .img-f {
-      width: 100%; display: block;
-      border: 1px solid rgba(0,229,255,.28);
-      box-shadow: 0 0 20px rgba(0,229,255,.1);
-      filter: saturate(1.15) contrast(1.05);
-    }
-    .cap {
-      font-family: 'Orbitron', monospace; font-size: .56rem; letter-spacing: .18em;
-      color: var(--c); opacity: .6; text-align: center; margin-top: .5rem;
-    }
-    /* stack maps vertically on mobile */
-    .ig { display: flex; flex-direction: column; gap: 1.2rem; }
-
-    /* ── Map btn ── */
-    .mbtn-a {
-      display: flex; align-items: center; justify-content: center; gap: .5rem;
-      color: var(--c); text-decoration: none;
-      font-family: 'Orbitron', monospace; font-size: .72rem; letter-spacing: .2em;
-      border: 1px solid var(--c); padding: .9rem 1.2rem;
-      box-shadow: 0 0 12px rgba(0,229,255,.22);
-      transition: box-shadow .3s; margin-bottom: 1.2rem;
-      min-height: 52px;
-    }
-    .mbtn-a:active { box-shadow: 0 0 24px var(--c); }
-
-    /* ── QR ── */
-    .qr { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
-    .qr img { width: 220px; height: 220px; border: 2px solid var(--c); box-shadow: 0 0 28px var(--c); padding: 12px; background: #fff; }
-
-    /* ══════════════════════════════════════
-       TERMINAL
-    ══════════════════════════════════════ */
-    #term {
-      background: #000; border: 1px solid rgba(0,229,255,.25);
-      box-shadow: 0 0 20px rgba(0,229,255,.08);
-      padding: .9rem 1rem; height: 260px;
-      overflow-y: auto; scroll-behavior: smooth;
-      font-family: 'Courier New', monospace; font-size: .82rem;
-      line-height: 1.85; color: #00cc88;
-    }
-    #term::-webkit-scrollbar { width: 3px; }
-    #term::-webkit-scrollbar-track { background: #000; }
-    #term::-webkit-scrollbar-thumb { background: var(--c); }
-    .tl-line { word-break: break-all; }
-    .tl-ts   { color: #444; }
-    .tl-al   { color: var(--m); }
-    .tl-ok   { color: var(--g); }
-    .tl-info { color: #00aaff; }
-    .tl-cmd  { color: #fff; }
-    #term-row {
-      display: flex; align-items: center; gap: .5rem;
-      background: #000; border: 1px solid rgba(0,229,255,.25); border-top: none;
-      padding: .6rem 1rem;
-      font-family: 'Courier New', monospace; font-size: .82rem;
-    }
-    #term-row span { color: var(--g); white-space: nowrap; font-size: .78rem; }
-    #term-input {
-      flex: 1; background: transparent; border: none; outline: none;
-      color: #00cc88; font-family: 'Courier New', monospace;
-      font-size: .82rem; caret-color: var(--g); min-height: 36px;
-    }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center; padding: 3rem 1rem 6rem;
-      font-family: 'Orbitron', monospace; letter-spacing: .3em;
-    }
-    .fh { font-size: 1.15rem; color: var(--c); text-shadow: 0 0 14px var(--c); margin-bottom: .7rem; }
-    .fs { font-size: .58rem; color: rgba(0,229,255,.38); line-height: 1.9; }
-
-    /* desktop adjustments — keep things readable on larger screens too */
-    @media (min-width: 601px) {
-      .ig { flex-direction: row; }
-      .ig > div { flex: 1; }
-      .row { grid-template-columns: 5.5rem 1fr; }
-    }
+    /* FOOTER */
+    footer{text-align:center; padding:3rem 1rem 6rem; font-family:'Orbitron',monospace; letter-spacing:.3em}
+    .fh{font-size:1.15rem; color:var(--c); text-shadow:0 0 14px var(--c); margin-bottom:.7rem}
+    .fs{font-size:.58rem; color:rgba(0,229,255,.38); line-height:1.9}
   </style>
 </head>
 <body>
 
-<!-- CRT sweep -->
-<div id="crt"></div>
-
-<!-- Audio -->
-<audio id="bgm" src="Cyber.mp3" loop preload="auto"></audio>
-
-<!-- Overload banner -->
-<div id="overload-banner">⚠ EMERGENCY SYSTEM OVERRIDE — MELTDOWN IMMINENT ⚠</div>
-
-<!-- ══════════════════════════════════════
-     HUD TOP BAR
-══════════════════════════════════════ -->
-<div id="hud">
-  <div class="hud-cell">
-    <div class="hud-lbl">SYS TIME</div>
-    <div id="hud-t">00:00:00.000</div>
-  </div>
-  <div id="hud-dot">●</div>
-  <div class="hud-cell right">
-    <div class="hud-lbl">MISSION</div>
-    <div id="hud-cd">--:--:--</div>
-  </div>
+<!-- ══ ORIENTATION LOCK ══ -->
+<div id="orient-lock">
+  <div class="ol-err">⚠ SECURITY ERROR ⚠</div>
+  <div class="ol-code">ERR_PORTRAIT_ACCESS_DENIED</div>
+  <div class="ol-msg">縦画面での閲覧は許可されていません<br>端末を横向きに回転させてください</div>
+  <div class="ol-phone"></div>
+  <div class="ol-hint">ROTATE DEVICE TO UNLOCK ↻</div>
+  <div class="ol-bar-track"><div class="ol-bar-fill"></div></div>
 </div>
 
-<!-- Music toggle -->
+<!-- ══ CRASH OVERLAY ══ -->
+<div id="crash-ov">
+  <canvas id="crash-canvas"></canvas>
+  <div id="crash-text">CRITICAL ERROR<br>SYSTEM COMPROMISED<br>REBOOTING...</div>
+</div>
+
+<!-- ══ SCAN LOG (long press) ══ -->
+<div id="scan-log">
+  <div id="scan-hdr">◈ BIOMETRIC SCAN IN PROGRESS</div>
+  <div id="scan-txt">&gt; INITIALIZING...</div>
+  <div class="scan-track"><div id="scan-fill"></div></div>
+  <div id="scan-hint">離さずに保持してください — Hold 3 seconds</div>
+</div>
+
+<div id="crt"></div>
+<audio id="bgm" src="Cyber.mp3" loop preload="auto"></audio>
+<div id="overload-banner">⚠ EMERGENCY SYSTEM OVERRIDE — MELTDOWN IMMINENT ⚠</div>
+
+<!-- ══ HUD ══ -->
+<div id="hud">
+  <div class="hud-main">
+    <div class="hud-cell">
+      <div class="hud-lbl">SYS TIME</div>
+      <div id="hud-t">00:00:00.000</div>
+    </div>
+    <div id="hud-dot">●</div>
+    <div class="hud-cell r">
+      <div class="hud-lbl">MISSION</div>
+      <div id="hud-cd">--:--:--</div>
+    </div>
+  </div>
+  <div id="bat-bar">[ POWER_CELL: SCANNING... ]</div>
+</div>
+
 <button id="mbtn" onclick="toggleMusic()">♪ OFF</button>
 
-<!-- ══════════════════════════════════════
-     BOOT OVERLAY
-══════════════════════════════════════ -->
+<!-- ══ BOOT ══ -->
 <div id="boot">
   <div id="boot-hdr">
     <div class="t">▓ SECURE TERMINAL v3.14 ▓</div>
-    <div style="font-size:.72rem; opacity:.7">OPERATOR: CLASSIFIED | <span id="bts"></span></div>
+    <div style="font-size:.72rem;opacity:.7">OPERATOR: CLASSIFIED | <span id="bts"></span></div>
   </div>
   <div id="boot-log"></div>
   <span id="boot-cur">█</span>
-  <div id="boot-enter">
-    <button onclick="dismissBoot()">[ ▶ &nbsp; ENTER ]</button>
-  </div>
+  <div id="boot-enter"><button onclick="dismissBoot()">[ ▶ &nbsp;ENTER ]</button></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     BIO-AUTH OVERLAY
-══════════════════════════════════════ -->
+<!-- ══ BIO-AUTH ══ -->
 <div id="bio-ov">
   <div class="bio-box">
     <div class="bio-title">⬡ BIOMETRIC AUTH ⬡</div>
@@ -482,22 +457,17 @@
       <div class="secret-info">
         幹事 <strong style="color:var(--g)">Teramoto</strong> まで<br>
         LINE または SMS でご連絡ください<br><br>
-        <span style="color:var(--m); font-size:.82rem">SECRET:</span>
-        <span style="font-size:.88rem"> 17:30 現地集合でよろしく！</span><br>
-        <span style="color:var(--m); font-size:.82rem">SECRET:</span>
-        <span style="font-size:.88rem"> 二次会は当日交渉</span>
+        <span style="color:var(--m)">SECRET:</span> 17:30 現地集合でよろしく！<br>
+        <span style="color:var(--m)">SECRET:</span> 二次会は当日交渉
       </div>
     </div>
-    <div class="bio-close-hint">[ ESC ] またはタップで閉じる</div>
+    <div class="bio-close-hint">[ タップで閉じる ]</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════ -->
+<!-- ══ MAIN ══ -->
 <div id="app">
 
-  <!-- HERO -->
   <div class="hero">
     <div class="co tl"></div><div class="co tr"></div>
     <div class="co bl"></div><div class="co br"></div>
@@ -506,13 +476,15 @@
       <span class="gt" data-t="CLAUDE WORK LAB">CLAUDE WORK LAB</span>
       <span class="night" id="hero-night">夜の部</span>
     </h1>
-    <div class="hero-dt">2026.06.10 &nbsp;｜&nbsp; 17:30 START</div>
-    <button id="part-btn" onclick="startBioAuth()">▶ RSVP / 参加表明</button>
+    <div class="hero-dt">2026.06.10 ｜ 17:30 START</div>
+    <button id="part-btn">
+      <div class="btn-fill"></div>
+      <span id="part-txt">▶ 長押しで参加表明 / HOLD 3s</span>
+    </button>
   </div>
 
   <div class="div"></div>
 
-  <!-- EVENT DETAILS -->
   <section>
     <div class="sl">EVENT DETAILS</div>
     <div class="card">
@@ -536,7 +508,6 @@
 
   <div class="div"></div>
 
-  <!-- RESTAURANT -->
   <section>
     <div class="sl">RESTAURANT</div>
     <img class="img-f" src="image/shop.png" alt="龍馬商店 新橋店">
@@ -545,36 +516,25 @@
 
   <div class="div"></div>
 
-  <!-- FEATURED DISH -->
   <section>
     <div class="sl">FEATURED DISH</div>
-    <img class="img-f" src="image/katsuo.jpg" alt="わら焼きカツオのタタキ">
+    <img class="img-f" src="image/katsuo.jpg" alt="カツオのタタキ">
     <div class="cap">▲ 土佐名物 わら焼きカツオのタタキ</div>
   </section>
 
   <div class="div"></div>
 
-  <!-- ACCESS -->
   <section>
     <div class="sl">ACCESS</div>
-    <a class="mbtn-a"
-       href="https://maps.google.com/?q=東京都港区新橋2-16-1+ニュー新橋ビル"
-       target="_blank" rel="noopener">▶ GOOGLE MAPS で開く</a>
+    <a class="mbtn-a" href="https://maps.google.com/?q=東京都港区新橋2-16-1+ニュー新橋ビル" target="_blank" rel="noopener">▶ GOOGLE MAPS で開く</a>
     <div class="ig">
-      <div>
-        <img class="img-f" src="image/map.png" alt="周辺アクセスマップ">
-        <div class="cap">▲ 周辺アクセスマップ</div>
-      </div>
-      <div>
-        <img class="img-f" src="image/floormap.png" alt="3Fフロアマップ">
-        <div class="cap">▲ ニュー新橋ビル 3F フロアマップ</div>
-      </div>
+      <div><img class="img-f" src="image/map.png" alt="周辺マップ"><div class="cap">▲ 周辺アクセスマップ</div></div>
+      <div><img class="img-f" src="image/floormap.png" alt="3Fフロア"><div class="cap">▲ ニュー新橋ビル 3F フロアマップ</div></div>
     </div>
   </section>
 
   <div class="div"></div>
 
-  <!-- QR -->
   <section>
     <div class="sl">SHARE THIS PAGE</div>
     <div class="qr">
@@ -585,25 +545,42 @@
 
   <div class="div"></div>
 
-  <!-- SYSTEM LOG TERMINAL -->
+  <!-- ══ FAKE CAMERA ══ -->
   <section>
-    <div class="sl">SYSTEM LOG — LIVE FEED</div>
-    <div id="term"></div>
-    <div id="term-row">
-      <span>cwl@night:~$&nbsp;</span>
-      <input id="term-input" type="text" autocomplete="off" spellcheck="false"
-             placeholder="'help' → Enter">
+    <div class="sl">FACE ID DECRYPTOR</div>
+    <div id="cam-view">
+      <div id="cam-line"></div>
+      <div class="cam-co tl"></div><div class="cam-co tr"></div>
+      <div class="cam-co bl"></div><div class="cam-co br"></div>
+      <div id="face-target"><div class="ft-h"></div><div class="ft-v"></div></div>
+      <div id="cam-status">SCANNING FACE...</div>
+    </div>
+    <div id="face-data">
+      <div class="fd-row"><div class="fd-lbl">TARGET</div><div class="fd-val" id="fd-target">素面</div></div>
+      <div class="fd-row"><div class="fd-lbl">酔合度</div><div class="fd-val" id="fd-drunk">0%</div></div>
+      <div class="fd-row"><div class="fd-lbl">EMOTION</div><div class="fd-val" id="fd-emotion">EXCITED</div></div>
+      <div class="fd-row"><div class="fd-lbl">THREAT</div><div class="fd-val" id="fd-threat">LOW</div></div>
     </div>
   </section>
 
   <div class="div"></div>
 
-  <!-- FOOTER -->
+  <section>
+    <div class="sl">SYSTEM LOG — LIVE FEED</div>
+    <div id="term"></div>
+    <div id="term-row">
+      <span>cwl@night:~$&nbsp;</span>
+      <input id="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="'help' → Enter">
+    </div>
+  </section>
+
+  <div class="div"></div>
+
   <footer>
     <div class="fh">ORGANIZER : TERAMOTO</div>
     <div class="fs">
       CLAUDE WORK LAB 夜の部 &nbsp;|&nbsp; 2026.06.10<br>
-      <span style="opacity:.35; font-size:.48rem">↑↑↓↓←→←→BA / ロゴを5回タップ</span>
+      <span style="opacity:.3;font-size:.48rem">ロゴを5回タップ → 緊急モード</span>
     </div>
   </footer>
 
@@ -613,8 +590,23 @@
 /* ─── UTILS ─── */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const $     = id  => document.getElementById(id);
-const pad   = (n, w = 2) => String(n).padStart(w, '0');
+const pad   = (n, w=2) => String(n).padStart(w, '0');
 const esc   = s   => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function throttle(fn, ms) {
+  let last = 0;
+  return function(...a) { const n = Date.now(); if (n - last < ms) return; last = n; return fn(...a); };
+}
+
+/* ─── ① ORIENTATION LOCK ─── */
+let orientUnlocked = false;
+function checkOrientation() {
+  const portrait = window.innerHeight > window.innerWidth;
+  const lock = $('orient-lock');
+  if (!orientUnlocked && portrait) { lock.style.display = 'flex'; }
+  else { lock.style.display = 'none'; orientUnlocked = true; }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 120));
 
 /* ─── BOOT ─── */
 const BOOT_LINES = [
@@ -623,88 +615,85 @@ const BOOT_LINES = [
   'LOADING EVENT DATA: "CLAUDE WORK LAB NIGHT_SESSION"',
   'LOCATION TARGETED: SHINBASHI, TOKYO',
   'SCANNING VENUE: NEW SHINBASHI BLDG 3F',
-  { text: 'DECRYPTING INVITE', suffix: '[COMPLETE]' },
-  { text: 'ACCESS GRANTED. WELCOME, OPERATIVE.', plain: true },
+  { text:'DECRYPTING INVITE', suffix:'[COMPLETE]' },
+  { text:'ACCESS GRANTED. WELCOME, OPERATIVE.', plain:true },
 ];
-
 async function typeText(el, str, delay) {
-  for (const ch of str) {
-    el.textContent += ch;
-    await sleep(delay + Math.random() * 8);
-  }
+  for (const ch of str) { el.textContent += ch; await sleep(delay + Math.random() * 8); }
 }
-
 async function runBoot() {
   const now = new Date();
-  $('bts').textContent =
-    `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ` +
-    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} JST`;
-
+  $('bts').textContent = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} JST`;
   const log = $('boot-log');
   for (const entry of BOOT_LINES) {
     const str   = typeof entry === 'string' ? entry : entry.text;
     const sfx   = typeof entry === 'object' && entry.suffix ? entry.suffix : '[OK]';
     const plain = typeof entry === 'object' && entry.plain;
-    const delay = str.length > 40 ? 10 : 16;
-
-    const div = document.createElement('div');
-    div.className = 'bl'; log.appendChild(div);
-    await typeText(div, str, delay);
-    if (!plain) {
-      const sp = document.createElement('span');
-      sp.className = 'ok'; sp.textContent = ' ' + sfx;
-      div.appendChild(sp);
-    }
+    const d = str.length > 40 ? 10 : 16;
+    const div = document.createElement('div'); div.className = 'bl'; log.appendChild(div);
+    await typeText(div, str, d);
+    if (!plain) { const sp = document.createElement('span'); sp.className = 'ok'; sp.textContent = ' ' + sfx; div.appendChild(sp); }
     await sleep(120);
   }
   $('boot-cur').style.display = 'none';
   $('boot-enter').style.display = 'block';
 }
-
-function dismissBoot() {
+async function dismissBoot() {
+  await requestSensorPermissions();
   const boot = $('boot');
   boot.style.pointerEvents = 'none'; boot.style.opacity = '0';
   setTimeout(() => {
     boot.style.display = 'none';
     $('app').style.opacity = '1';
-    scheduleGlitch();
-    initTerminal();
+    scheduleGlitch(); initTerminal(); initFakeCamera();
   }, 820);
   startMusic();
 }
 
 /* ─── HUD ─── */
 const MISSION = new Date('2026-06-10T17:30:00+09:00');
-
 function tickHUD() {
   const now = new Date();
-  $('hud-t').textContent =
-    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(),3)}`;
-
+  $('hud-t').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad(now.getMilliseconds(),3)}`;
   const diff = MISSION - now;
-  const cd   = $('hud-cd');
+  const cd = $('hud-cd');
   if (diff > 0) {
     const s = Math.floor(diff / 1000);
     cd.textContent = `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;
     cd.classList.remove('mission');
-  } else {
-    cd.textContent = 'IN PROGRESS';
-    cd.classList.add('mission');
-  }
+  } else { cd.textContent = 'IN PROGRESS'; cd.classList.add('mission'); }
   requestAnimationFrame(tickHUD);
+}
+
+/* ─── ③ BATTERY API ─── */
+async function initBattery() {
+  const bar = $('bat-bar');
+  if (!navigator.getBattery) { bar.textContent = '[ POWER_CELL: CLASSIFIED ]'; return; }
+  try {
+    const bat = await navigator.getBattery();
+    function upd() {
+      const pct = Math.round(bat.level * 100);
+      let msg, col;
+      if (bat.charging)  { msg = '⚡ CHARGING'; col = 'var(--g)'; }
+      else if (pct >= 80){ msg = '作戦行動に十分なエネルギー'; col = 'var(--g)'; }
+      else if (pct >= 50){ msg = '作戦継続可能'; col = 'var(--g)'; }
+      else if (pct >= 20){ msg = '要注意 — 充電を検討'; col = '#ff8800'; }
+      else               { msg = '警告: アルコール補給で急速充電が必要'; col = '#f00'; }
+      bar.innerHTML = `<span style="color:${col}">[ POWER_CELL: ${pct}% ] ${msg}</span>`;
+    }
+    upd();
+    bat.addEventListener('levelchange', upd);
+    bat.addEventListener('chargingchange', upd);
+  } catch(e) { bar.textContent = '[ POWER_CELL: N/A ]'; }
 }
 
 /* ─── GLITCH ─── */
 function triggerGlitch() {
   const el = document.querySelector('.gt');
   if (!el || el.classList.contains('go')) return;
-  el.classList.add('go');
-  setTimeout(() => el.classList.remove('go'), 400);
+  el.classList.add('go'); setTimeout(() => el.classList.remove('go'), 400);
 }
-function scheduleGlitch() {
-  setTimeout(() => { triggerGlitch(); scheduleGlitch(); }, 5000 + Math.random() * 5000);
-}
-document.querySelector('.gt')?.addEventListener('click', triggerGlitch);
+function scheduleGlitch() { setTimeout(() => { triggerGlitch(); scheduleGlitch(); }, 5000 + Math.random() * 5000); }
 
 /* ─── MUSIC ─── */
 let playing = false;
@@ -717,213 +706,260 @@ function toggleMusic() {
   updateMBtn();
 }
 function updateMBtn() {
-  const b = $('mbtn');
-  b.textContent = playing ? '♪ ON' : '♪ OFF';
+  const b = $('mbtn'); b.textContent = playing ? '♪ ON' : '♪ OFF';
   playing ? b.classList.add('on') : b.classList.remove('on');
 }
 
-/* ─── BIO-AUTH ─── */
-async function startBioAuth() {
-  const ov = $('bio-ov'); ov.classList.add('show');
-  const bar = $('bio-bar'), status = $('bio-status');
-  $('bio-secret').style.display = 'none';
-  status.style.animation = '';
-  bar.style.transition = 'none'; bar.style.width = '0%';
-  await sleep(30);
+/* ─── ② LONG PRESS BIO-AUTH ─── */
+const HOLD_MS = 3000;
+const SCAN_MSGS = [
+  'BIOMETRICS SCANNING...','FINGERPRINT: ▓▓▓▓░ ANALYZING',
+  'LINE_DATA_EXTRACTING... [12%]','FACIAL_GEOMETRY_MAPPING...',
+  'LINE_DATA_EXTRACTING... [35%]','ALCOHOL_TOLERANCE: CHECKING',
+  'NOMIKAI_ELIGIBILITY: VERIFYING','LINE_DATA_EXTRACTING... [67%]',
+  'CLEARANCE_LEVEL: CHECKING','BEER_GENOME_MATCHING...',
+  'LINE_DATA_EXTRACTING... [89%]','KATSUO_AFFINITY: CONFIRMED',
+];
+let isHolding = false, holdTimer = null, scanTimer = null, vibTimer = null, scanIdx = 0, pressStart = 0;
 
-  for (const s of [
-    { text:'ACCESS REQUESTED...',              dur:700,  pct:15  },
-    { text:'SCANNING BIOMETRICS...',           dur:1100, pct:42  },
-    { text:'VERIFYING RETINAL PATTERN...',     dur:900,  pct:68  },
-    { text:'CROSS-REFERENCING INVITE CODE...', dur:800,  pct:88  },
-    { text:'DECRYPTING CREDENTIALS...',        dur:600,  pct:100 },
-  ]) {
-    status.textContent = s.text;
-    bar.style.transition = `width ${s.dur}ms linear`;
-    bar.style.width = s.pct + '%';
-    await sleep(s.dur + 80);
-  }
-  status.style.animation = 'none';
-  status.textContent = '✓ AUTHENTICATION COMPLETE';
-  $('bio-secret').style.display = 'block';
+function onHoldStart(e) {
+  e.preventDefault(); if (isHolding) return;
+  isHolding = true; pressStart = Date.now(); scanIdx = 0;
+  const btn = $('part-btn');
+  btn.classList.add('pressing');
+  $('part-txt').textContent = '■ SCANNING...';
+  const sl = $('scan-log'), fill = $('scan-fill');
+  sl.style.display = 'block';
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  requestAnimationFrame(() => { fill.style.transition = `width ${HOLD_MS}ms linear`; fill.style.width = '100%'; });
+  (function nextMsg() { if (!isHolding) return; $('scan-txt').textContent = '> ' + SCAN_MSGS[scanIdx++ % SCAN_MSGS.length]; scanTimer = setTimeout(nextMsg, 240); })();
+  (function vibLoop() { if (!isHolding) return; navigator.vibrate && navigator.vibrate(40); vibTimer = setTimeout(vibLoop, 280); })();
+  holdTimer = setTimeout(() => { if (isHolding) clearHold(true); }, HOLD_MS);
 }
-
-$('bio-ov').addEventListener('click', e => { if (e.target === $('bio-ov')) closeBioAuth(); });
+function onHoldEnd() {
+  if (!isHolding) return;
+  clearHold(Date.now() - pressStart >= HOLD_MS);
+}
+function clearHold(success) {
+  isHolding = false;
+  clearTimeout(holdTimer); clearTimeout(scanTimer); clearTimeout(vibTimer);
+  navigator.vibrate && navigator.vibrate(0);
+  const btn = $('part-btn'), fill = $('scan-fill');
+  btn.classList.remove('pressing');
+  $('part-txt').textContent = '▶ 長押しで参加表明 / HOLD 3s';
+  $('scan-log').style.display = 'none';
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  if (success) showBioSuccess();
+}
+function showBioSuccess() {
+  navigator.vibrate && navigator.vibrate([100,50,100,50,200]);
+  const ov = $('bio-ov'); ov.classList.add('show');
+  $('bio-secret').style.display = 'none';
+  $('bio-status').style.animation = 'none';
+  $('bio-bar').style.transition = 'none'; $('bio-bar').style.width = '100%';
+  $('bio-status').textContent = '✓ AUTHENTICATION COMPLETE';
+  setTimeout(() => $('bio-secret').style.display = 'block', 400);
+}
 function closeBioAuth() {
   $('bio-ov').classList.remove('show');
   setTimeout(() => {
-    $('bio-status').style.animation = '';
-    $('bio-status').textContent = 'STANDBY...';
-    $('bio-bar').style.width = '0%';
-    $('bio-secret').style.display = 'none';
+    $('bio-status').style.animation = ''; $('bio-status').textContent = 'STANDBY...';
+    $('bio-bar').style.width = '0%'; $('bio-secret').style.display = 'none';
   }, 400);
+}
+
+/* ─── ④ GYROSCOPE TILT ─── */
+let tiltTx = 0, tiltTy = 0, tiltCx = 0, tiltCy = 0;
+const handleOrientation = throttle(e => {
+  tiltTx = Math.max(-6, Math.min(6, ((e.beta  || 70) - 70) * 0.1));
+  tiltTy = Math.max(-6, Math.min(6,  (e.gamma || 0)  * 0.12));
+}, 16);
+(function animTilt() {
+  tiltCx += (tiltTx - tiltCx) * 0.08;
+  tiltCy += (tiltTy - tiltCy) * 0.08;
+  const app = $('app');
+  if (app && (Math.abs(tiltCx) > 0.05 || Math.abs(tiltCy) > 0.05))
+    app.style.transform = `perspective(700px) rotateX(${tiltCx}deg) rotateY(${tiltCy}deg)`;
+  requestAnimationFrame(animTilt);
+})();
+
+/* ─── ④ SHAKE → CRASH ─── */
+let lastA = {x:0,y:0,z:0}, shakeCnt = 0, lastShakeT = 0, lastCrashT = 0;
+const handleMotion = throttle(e => {
+  const ac = e.accelerationIncludingGravity; if (!ac) return;
+  const dx = Math.abs((ac.x||0)-lastA.x), dy = Math.abs((ac.y||0)-lastA.y), dz = Math.abs((ac.z||0)-lastA.z);
+  lastA = {x:ac.x||0, y:ac.y||0, z:ac.z||0};
+  const now = Date.now(), delta = dx+dy+dz;
+  if (delta > 28) {
+    if (now - lastShakeT > 150) { shakeCnt++; lastShakeT = now; }
+    if (shakeCnt >= 4 && now - lastCrashT > 6000) { shakeCnt = 0; lastCrashT = now; triggerCrash(); }
+  }
+  if (now - lastShakeT > 800) shakeCnt = 0;
+}, 16);
+
+function triggerCrash() {
+  navigator.vibrate && navigator.vibrate([300,100,300,100,600]);
+  const ov = $('crash-ov'), cv = $('crash-canvas');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  ov.style.opacity = '1'; ov.style.display = 'flex';
+  const ctx = cv.getContext('2d');
+  let f = 0;
+  (function draw() {
+    if (f++ >= 75) { ov.style.transition = 'opacity .6s'; ov.style.opacity = '0'; setTimeout(() => { ov.style.display = 'none'; ov.style.transition = ''; }, 650); return; }
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cv.width, cv.height);
+    for (let i = 0; i < 300; i++) {
+      const x = Math.random()*cv.width, y = Math.random()*cv.height, s = Math.random()*6+2;
+      ctx.fillStyle = Math.random()>.3 ? '#fff' : (Math.random()>.5 ? '#0f0' : '#f00');
+      ctx.fillRect(x, y, s, s);
+    }
+    requestAnimationFrame(draw);
+  })();
+}
+
+/* ─── ⑤ FAKE CAMERA ─── */
+let faceTx = 50, faceTy = 50, faceCx = 50, faceCy = 50;
+const pageOpen = Date.now();
+const EMOTIONS = ['EXCITED','NERVOUS','HAPPY','ANTICIPATING','THIRSTY','HUNGRY'];
+const THREATS  = ['LOW','MINIMAL','NOMINAL','MODERATE'];
+const CSTATUS  = ['SCANNING FACE...','BIOMETRICS LOCK','FACE DETECTED','ANALYZING...','IDENTITY CHECK'];
+
+function initFakeCamera() {
+  (function animFace() {
+    faceCx += (faceTx - faceCx) * 0.04;
+    faceCy += (faceTy - faceCy) * 0.04;
+    const ft = $('face-target');
+    if (ft) { ft.style.left = faceCx+'%'; ft.style.top = faceCy+'%'; }
+    requestAnimationFrame(animFace);
+  })();
+  (function moveTarget() {
+    faceTx = 15 + Math.random()*70; faceTy = 15 + Math.random()*70;
+    setTimeout(moveTarget, 1500 + Math.random()*3000);
+  })();
+  (function updateData() {
+    const mins = (Date.now() - pageOpen) / 60000;
+    const pct  = Math.min(99, Math.floor(mins * 20));
+    if ($('fd-drunk'))   $('fd-drunk').textContent   = pct + '%';
+    if ($('fd-emotion')) $('fd-emotion').textContent = EMOTIONS[0|Math.random()*EMOTIONS.length];
+    if ($('fd-threat'))  $('fd-threat').textContent  = THREATS[0|Math.random()*THREATS.length];
+    if ($('fd-target'))  $('fd-target').textContent  = pct>70 ? '泥酔者' : pct>40 ? 'ほろ酔い' : '素面';
+    if ($('cam-status')) $('cam-status').textContent = CSTATUS[0|Math.random()*CSTATUS.length];
+    setTimeout(updateData, 1500 + Math.random()*1500);
+  })();
 }
 
 /* ─── TERMINAL ─── */
 const AUTO_LOGS = [
-  { t:'info',  m:'Monitoring atmospheric conditions in Shinbashi...' },
-  { t:'alert', m:'ALERT: High concentration of ethanol detected near target zone.' },
-  { t:'info',  m:'SYSTEM: Operative alcohol-tolerance parameters initialized.' },
-  { t:'info',  m:'Location lock confirmed: New Shinbashi Bldg 3F [RYOMA SHOUTEN]' },
-  { t:'alert', m:'ALERT: Katsuo-tataki inventory at critical levels. Reordering...' },
-  { t:'info',  m:'Tracking TERAMOTO — status: MISSION READY ✓' },
-  { t:'alert', m:'ALERT: Beer temperature optimal. Deploy immediately.' },
-  { t:'info',  m:'Straw-fire sensor calibrated. Katsuo burn trajectory: nominal.' },
-  { t:'info',  m:'Social interaction module loaded: IZAKAYA_MODE.dll v4.2' },
-  { t:'alert', m:'ALERT: Next train departs 新橋 in 8 min — hold position.' },
-  { t:'info',  m:'SECRET MENU decrypted: [KATSUO_EXTRA_RARE: UNLOCKED]' },
-  { t:'info',  m:'Memory buffer: 512MB reserved for post-mission anecdotes.' },
-  { t:'alert', m:'WARNING: Excessive laughter levels — civilian attraction risk HIGH.' },
-  { t:'info',  m:'SYSTEM: Karaoke failsafe DISABLED by admin TERAMOTO.' },
-  { t:'alert', m:'ALERT: Ryoma statue sighted on 3F. Approach with reverence.' },
+  {t:'info', m:'Monitoring atmospheric conditions in Shinbashi...'},
+  {t:'alert',m:'ALERT: High concentration of ethanol detected near target zone.'},
+  {t:'info', m:'SYSTEM: Operative alcohol-tolerance parameters initialized.'},
+  {t:'info', m:'Location lock confirmed: New Shinbashi Bldg 3F [RYOMA SHOUTEN]'},
+  {t:'alert',m:'ALERT: Katsuo-tataki inventory at critical levels. Reordering...'},
+  {t:'info', m:'Tracking TERAMOTO — status: MISSION READY ✓'},
+  {t:'alert',m:'ALERT: Beer temperature optimal. Deploy immediately.'},
+  {t:'info', m:'Straw-fire sensor calibrated. Katsuo burn trajectory: nominal.'},
+  {t:'info', m:'Social module loaded: IZAKAYA_MODE.dll v4.2'},
+  {t:'alert',m:'ALERT: Next train departs 新橋 in 8 min — hold position.'},
+  {t:'info', m:'SECRET MENU decrypted: [KATSUO_EXTRA_RARE: UNLOCKED]'},
+  {t:'alert',m:'WARNING: Excessive laughter levels — civilian attraction risk HIGH.'},
+  {t:'info', m:'SYSTEM: Karaoke failsafe DISABLED by admin TERAMOTO.'},
+  {t:'alert',m:'ALERT: Ryoma statue sighted on 3F. Approach with reverence.'},
 ];
 let autoIdx = 0;
-
-function addTermLog(msg, type = 'info') {
+function addTermLog(msg, type='info') {
   const term = $('term'); if (!term) return;
-  const now = new Date();
-  const ts  = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  const typeSpan = type==='alert' ? `<span class="tl-al">[ALERT]</span>` :
-                   type==='cmd'   ? `<span class="tl-cmd">$</span>` :
-                   type==='ok'    ? `<span class="tl-ok">[OK]</span>` :
-                                    `<span class="tl-info">[INFO]</span>`;
-  const line = document.createElement('div');
-  line.className = 'tl-line';
-  line.innerHTML = `<span class="tl-ts">[${ts}]</span> ${typeSpan} ${esc(msg)}`;
-  term.appendChild(line);
-  term.scrollTop = term.scrollHeight;
+  const now = new Date(), ts = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const sp = type==='alert'?`<span class="tl-al">[ALERT]</span>`:type==='cmd'?`<span class="tl-cmd">$</span>`:type==='ok'?`<span class="tl-ok">[OK]</span>`:`<span class="tl-info">[INFO]</span>`;
+  const line = document.createElement('div'); line.className='tl-line';
+  line.innerHTML = `<span class="tl-ts">[${ts}]</span> ${sp} ${esc(msg)}`;
+  term.appendChild(line); term.scrollTop = term.scrollHeight;
 }
-
-function scheduleAutoLog() {
-  setTimeout(() => {
-    const { t, m } = AUTO_LOGS[autoIdx % AUTO_LOGS.length];
-    addTermLog(m, t); autoIdx++;
-    scheduleAutoLog();
-  }, 3500 + Math.random() * 4500);
-}
-
 function initTerminal() {
-  addTermLog('Terminal online. Surveillance active.', 'ok');
-  addTermLog('"help" → operator commands', 'info');
-  scheduleAutoLog();
+  addTermLog('Terminal online. Surveillance active.','ok');
+  addTermLog('"help" → operator commands','info');
+  (function sched() {
+    setTimeout(() => {
+      const {t,m} = AUTO_LOGS[autoIdx++ % AUTO_LOGS.length];
+      addTermLog(m,t); sched();
+    }, 3500 + Math.random()*4500);
+  })();
 }
-
 $('term-input').addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  e.preventDefault();
-  const cmd = e.target.value.trim().toLowerCase();
-  if (!cmd) return;
-  e.target.value = '';
-  addTermLog(cmd, 'cmd');
-  switch (cmd) {
+  if (e.key !== 'Enter') return; e.preventDefault();
+  const cmd = e.target.value.trim().toLowerCase(); if (!cmd) return;
+  e.target.value = ''; addTermLog(cmd,'cmd');
+  switch(cmd) {
     case 'help':
-      addTermLog('─── CLASSIFIED INTEL: TERAMOTO ───', 'ok');
-      addTermLog('遅刻厳禁！17:30 現地集合でお願いします', 'info');
-      addTermLog('SECRET MENU: 鰹のたたき 10人前 注文済み', 'info');
-      addTermLog('二次会: 現地交渉次第（作戦続行の意思あり）', 'info');
-      addTermLog('HINT: ロゴを5回タップで緊急モード発動', 'alert');
-      break;
+      addTermLog('─── INTEL FROM: TERAMOTO ───','ok');
+      addTermLog('遅刻厳禁！17:30 現地集合でお願いします','info');
+      addTermLog('SECRET MENU: 鰹のたたき 10人前 注文済み','info');
+      addTermLog('二次会: 現地交渉次第（意思あり）','info');
+      addTermLog('HINT: ロゴを5回タップで緊急モード','alert'); break;
     case 'status':
-      addTermLog(`BGM: ${playing ? 'ONLINE' : 'OFFLINE'}`, 'info');
-      addTermLog('MISSION STATUS: ACTIVE', 'info');
-      break;
-    case 'ls':
-      addTermLog('drinks/  food/  secrets/  teramoto.exe  katsuo.dat', 'info');
-      break;
-    case 'whoami':
-      addTermLog('CLASSIFIED OPERATIVE — CLEARANCE LEVEL 5', 'info');
-      break;
-    case 'clear':
-      $('term').innerHTML = ''; break;
-    case 'date':
-      addTermLog(new Date().toLocaleString('ja-JP'), 'info'); break;
-    default:
-      addTermLog(`command not found: ${esc(cmd)}`, 'alert');
-      addTermLog('"help" for commands', 'info');
+      addTermLog(`BGM: ${playing?'ONLINE':'OFFLINE'}`,'info');
+      addTermLog('MISSION STATUS: ACTIVE','info'); break;
+    case 'ls': addTermLog('drinks/  food/  secrets/  teramoto.exe','info'); break;
+    case 'whoami': addTermLog('CLASSIFIED OPERATIVE — CLEARANCE LEVEL 5','info'); break;
+    case 'clear': $('term').innerHTML=''; break;
+    case 'date': addTermLog(new Date().toLocaleString('ja-JP'),'info'); break;
+    default: addTermLog(`command not found: ${esc(cmd)}`,'alert'); addTermLog('"help" for commands','info');
   }
 });
 
-/* ─── KONAMI + OVERLOAD ─── */
+/* ─── ⑥ KONAMI + OVERLOAD ─── */
 const KONAMI = [38,38,40,40,37,39,37,39,66,65];
 let ki = 0, isOverload = false;
-
 document.addEventListener('keydown', e => {
   if (e.keyCode === 27) {
     if ($('bio-ov').classList.contains('show')) { closeBioAuth(); return; }
     if (isOverload) { toggleOverload(); return; }
   }
-  if (e.keyCode === KONAMI[ki]) {
-    if (++ki === KONAMI.length) { ki = 0; toggleOverload(); }
-  } else { ki = e.keyCode === KONAMI[0] ? 1 : 0; }
+  if (e.keyCode === KONAMI[ki]) { if (++ki === KONAMI.length) { ki=0; toggleOverload(); } }
+  else { ki = e.keyCode===KONAMI[0]?1:0; }
 });
-
-let tapCount = 0, tapTimer;
+let tapCnt=0, tapTmr;
 $('hero-h1')?.addEventListener('click', () => {
-  clearTimeout(tapTimer);
-  tapCount++;
-  tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
-  if (tapCount >= 5) { tapCount = 0; toggleOverload(); }
+  clearTimeout(tapTmr); tapCnt++;
+  tapTmr = setTimeout(()=>{ tapCnt=0; }, 1500);
+  if (tapCnt>=5) { tapCnt=0; toggleOverload(); }
 });
-
 function toggleOverload() {
   isOverload = !isOverload;
   document.body.classList.toggle('overload', isOverload);
   const gt = document.querySelector('.gt'), night = $('hero-night');
   if (isOverload) {
-    gt.textContent = '[ SYSTEM OVERRIDE ]';
-    gt.setAttribute('data-t', '[ SYSTEM OVERRIDE ]');
-    night.textContent = '⚠ MELTDOWN ⚠';
-    addTermLog('EMERGENCY OVERRIDE ACTIVATED — ALL SYSTEMS CRITICAL', 'alert');
-    addTermLog('ESC またはロゴ5回タップで解除', 'info');
+    gt.textContent='[ SYSTEM OVERRIDE ]'; gt.setAttribute('data-t','[ SYSTEM OVERRIDE ]');
+    night.textContent='⚠ MELTDOWN ⚠';
+    addTermLog('EMERGENCY OVERRIDE ACTIVATED','alert');
+    navigator.vibrate && navigator.vibrate([100,50,100,50,500]);
   } else {
-    gt.textContent = 'CLAUDE WORK LAB';
-    gt.setAttribute('data-t', 'CLAUDE WORK LAB');
-    night.textContent = '夜の部';
-    addTermLog('System restored to nominal parameters.', 'ok');
+    gt.textContent='CLAUDE WORK LAB'; gt.setAttribute('data-t','CLAUDE WORK LAB');
+    night.textContent='夜の部'; addTermLog('System restored.','ok');
   }
 }
 
-/* ─── CURSOR (desktop only) ─── */
-(function () {
-  if (window.matchMedia('(pointer: coarse)').matches) return;
-  const style = document.createElement('style');
-  style.textContent = `
-    * { cursor: none !important; }
-    #reticle { position:fixed; z-index:9990; pointer-events:none; width:38px; height:38px; transform:translate(-50%,-50%); }
-    .rh,.rv { position:absolute; background:var(--c); box-shadow:0 0 5px var(--c); }
-    .rh { left:0;right:0;top:50%;height:1px;transform:translateY(-50%); }
-    .rv { top:0;bottom:0;left:50%;width:1px;transform:translateX(-50%); }
-    .rc { position:absolute;width:7px;height:7px; }
-    .rc.tl{top:0;left:0;border-top:1px solid var(--c);border-left:1px solid var(--c);}
-    .rc.tr{top:0;right:0;border-top:1px solid var(--c);border-right:1px solid var(--c);}
-    .rc.bl{bottom:0;left:0;border-bottom:1px solid var(--c);border-left:1px solid var(--c);}
-    .rc.br{bottom:0;right:0;border-bottom:1px solid var(--c);border-right:1px solid var(--c);}
-    .rdot { position:absolute;width:3px;height:3px;border-radius:50%;background:var(--c);box-shadow:0 0 5px var(--c);top:50%;left:50%;transform:translate(-50%,-50%); }
-    #rlabel { position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'Courier New',monospace;font-size:.5rem;color:var(--c);white-space:nowrap;opacity:0;transition:opacity .15s; }
-    #reticle.lock { width:54px;height:54px; }
-    #reticle.lock .rh,#reticle.lock .rv,#reticle.lock .rdot { background:var(--m);box-shadow:0 0 8px var(--m); }
-    #reticle.lock .rc { border-color:var(--m); }
-    #reticle.lock #rlabel { opacity:1;color:var(--m); }
-    #reticle { transition:width .12s,height .12s; }
-  `;
-  document.head.appendChild(style);
-
-  const ret = document.createElement('div');
-  ret.id = 'reticle';
-  ret.innerHTML = '<div class="rh"></div><div class="rv"></div><div class="rc tl"></div><div class="rc tr"></div><div class="rc bl"></div><div class="rc br"></div><div class="rdot"></div><div id="rlabel">LOCK ON</div>';
-  document.body.appendChild(ret);
-
-  let tx = -200, ty = -200, cx = -200, cy = -200;
-  document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; ret.style.display = 'block'; });
-  (function animate() { cx += (tx-cx)*.14; cy += (ty-cy)*.14; ret.style.left = cx+'px'; ret.style.top = cy+'px'; requestAnimationFrame(animate); })();
-  document.addEventListener('mouseover', e => { if (e.target.closest('a,button,input,[onclick]')) ret.classList.add('lock'); });
-  document.addEventListener('mouseout',  e => { if (e.target.closest('a,button,input,[onclick]')) ret.classList.remove('lock'); });
-})();
+/* ─── SENSOR PERMISSIONS (iOS 13+) ─── */
+async function requestSensorPermissions() {
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try { if (await DeviceOrientationEvent.requestPermission()==='granted') window.addEventListener('deviceorientation', handleOrientation, {passive:true}); } catch(e){}
+  } else { window.addEventListener('deviceorientation', handleOrientation, {passive:true}); }
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try { if (await DeviceMotionEvent.requestPermission()==='granted') window.addEventListener('devicemotion', handleMotion, {passive:true}); } catch(e){}
+  } else { window.addEventListener('devicemotion', handleMotion, {passive:true}); }
+}
 
 /* ─── INIT ─── */
 window.addEventListener('DOMContentLoaded', () => {
+  checkOrientation();
   requestAnimationFrame(tickHUD);
+  initBattery();
   runBoot();
+
+  const btn = $('part-btn');
+  btn.addEventListener('touchstart', onHoldStart, {passive:false});
+  btn.addEventListener('touchend',   onHoldEnd);
+  btn.addEventListener('touchcancel',onHoldEnd);
+
+  $('bio-ov').addEventListener('click', e => { if (e.target===$('bio-ov')) closeBioAuth(); });
 });
 </script>
 </body>

@@ -49,9 +49,6 @@
       background:repeating-linear-gradient(
         0deg,transparent,transparent 1px,rgba(255,0,0,.2) 1px,rgba(255,0,0,.2) 3px);
     }
-    #overload-banner{display:none}
-    body.overload #overload-banner{display:flex}
-
     /* ══ ORIENTATION LOCK ══ */
     #orient-lock{
       position:fixed; inset:0; z-index:10000;
@@ -103,6 +100,7 @@
 
     /* ══ OVERLOAD BANNER ══ */
     #overload-banner{
+      display:none;
       position:fixed; top:var(--hud); left:0; right:0; z-index:999;
       background:rgba(255,0,0,.18); border-bottom:2px solid #f00;
       justify-content:center; align-items:center;
@@ -110,6 +108,7 @@
       color:#f00; letter-spacing:.3em; text-shadow:0 0 10px #f00;
       animation:blink .35s step-end infinite;
     }
+    body.overload #overload-banner{display:flex}
 
     /* ══ HUD ══ */
     #hud{
@@ -478,7 +477,7 @@
     </h1>
     <div class="hero-dt">2026.06.10 ｜ 17:30 START</div>
     <button id="part-btn">
-      <div class="btn-fill"></div>
+      <span class="btn-fill"></span>
       <span id="part-txt">▶ 長押しで参加表明 / HOLD 3s</span>
     </button>
   </div>
@@ -638,16 +637,22 @@ async function runBoot() {
   $('boot-cur').style.display = 'none';
   $('boot-enter').style.display = 'block';
 }
-async function dismissBoot() {
-  await requestSensorPermissions();
+let bootDismissed = false;
+function dismissBoot() {
+  if (bootDismissed) return;
+  bootDismissed = true;
+  // startMusic must run synchronously inside user gesture context
+  startMusic();
   const boot = $('boot');
-  boot.style.pointerEvents = 'none'; boot.style.opacity = '0';
+  boot.style.pointerEvents = 'none';
+  boot.style.opacity = '0';
+  // request sensor permissions after audio (fire-and-forget)
+  requestSensorPermissions();
   setTimeout(() => {
     boot.style.display = 'none';
     $('app').style.opacity = '1';
     scheduleGlitch(); initTerminal(); initFakeCamera();
   }, 820);
-  startMusic();
 }
 
 /* ─── HUD ─── */
@@ -892,7 +897,7 @@ $('term-input').addEventListener('keydown', e => {
       addTermLog('─── INTEL FROM: TERAMOTO ───','ok');
       addTermLog('遅刻厳禁！17:30 現地集合でお願いします','info');
       addTermLog('SECRET MENU: 鰹のたたき 10人前 注文済み','info');
-      addTermLog('二次会: 現地交渉次第（意思あり）','info');
+      addTermLog('二次会: 禁止です','info');
       addTermLog('HINT: ロゴを5回タップで緊急モード','alert'); break;
     case 'status':
       addTermLog(`BGM: ${playing?'ONLINE':'OFFLINE'}`,'info');

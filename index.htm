@@ -300,6 +300,7 @@
     .val strong{display:block; font-size:1.1rem; color:var(--c); text-shadow:0 0 8px var(--c); margin-bottom:.1rem; line-height:1.45}
     .img-f{width:100%; display:block; border:1px solid rgba(0,229,255,.28); box-shadow:0 0 20px rgba(0,229,255,.1); filter:saturate(1.15) contrast(1.05)}
     video.img-f{background:#000; aspect-ratio:16/9; object-fit:cover}
+    video.img-f.portrait{aspect-ratio:9/16; object-fit:contain}
     .cap{font-family:'Orbitron',monospace; font-size:.54rem; letter-spacing:.18em; color:var(--c); opacity:.6; text-align:center; margin-top:.5rem}
     .ig{display:flex; flex-direction:column; gap:1.2rem}
     .mbtn-a{
@@ -531,7 +532,7 @@
     <a class="mbtn-a" href="https://maps.google.com/?q=東京都港区新橋5丁目34番6号+イーグル新橋ビルB1" target="_blank" rel="noopener">▶ GOOGLE MAPS で開く</a>
     <div class="ig">
       <div><img class="img-f" src="image/meeting-place.png" alt="集合場所"><div class="cap">■ 集合場所</div></div>
-      <div><video class="img-f" src="image/map-loop.mp4" autoplay muted loop playsinline></video><div class="cap">■ アクセス動画 - LOOP</div></div>
+      <div><video class="img-f portrait" src="image/map-loop.mp4" autoplay muted loop playsinline></video><div class="cap">■ アクセス動画 - LOOP</div></div>
     </div>
   </section>
 

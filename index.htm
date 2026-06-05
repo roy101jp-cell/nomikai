@@ -725,7 +725,10 @@ function startMusic() {
 }
 function toggleMusic() {
   const a = $('bgm');
-  if (!a.src) a.src = TRACKS[trackIdx];
+  if (!a.src || (trackIdx >= TRACKS.length - 1 && a.ended)) {
+    trackIdx = 0;
+    a.src = TRACKS[trackIdx];
+  }
   playing ? (a.pause(), playing = false) : (a.play(), playing = true);
   updateMBtn();
 }
@@ -734,10 +737,14 @@ function updateMBtn() {
   playing ? b.classList.add('on') : b.classList.remove('on');
 }
 $('bgm').addEventListener('ended', () => {
-  trackIdx = (trackIdx + 1) % TRACKS.length;
   const a = $('bgm');
-  a.src = TRACKS[trackIdx];
-  if (playing) a.play().catch(() => {});
+  if (trackIdx < TRACKS.length - 1) {
+    trackIdx++;
+    a.src = TRACKS[trackIdx];
+    if (playing) a.play().catch(() => {});
+  } else {
+    playing = false;
+  }
   updateMBtn();
 });
 
